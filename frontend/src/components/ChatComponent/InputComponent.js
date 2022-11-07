@@ -15,6 +15,7 @@ import "../styles.css";
 import { ChatState } from "../../Context/ChatProvider";
 
 const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
+  const [istyping, setIsTyping] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const [typing, setTyping] = useState(false);
@@ -155,7 +156,7 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
       const { data } = await axios.post(
         "/api/message",
         {
-          content: "image",
+          content: " image",
           chatId: selectedChat,
           pic: pic,
         },
@@ -180,11 +181,9 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
   const handleBackspace = async (event) => {
     // const coutn = newMessage.length;
 
-    if (event.key === "Backspace" ) {
-      if(newMessage.length === 0){
-        socket.emit("stop typing", selectedChat._id);
-        setTyping(false);
-      }
+    if (event.key === "Backspace") {
+      //   console.log(newMessage.length);
+      //   console.log("aa");
       let lastTypingTime = new Date().getTime();
       var timerLength = 1000;
       setTimeout(() => {
@@ -281,7 +280,7 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
               onChange={typingHandler}
               width="98%"
               size="md"
-              onKeyDown={handleBackspace}
+              // onKeyDown={sendMessage}
               // mr={1}
             />
           </FormControl>

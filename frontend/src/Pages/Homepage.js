@@ -6,6 +6,7 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
+  Text,
   Image,
 } from "@chakra-ui/react";
 import { useEffect } from "react";
@@ -13,6 +14,7 @@ import { useHistory } from "react-router";
 import Login from "../components/Authentication/Login";
 import Signup from "../components/Authentication/Signup";
 import logo from "../img/message-logo-removebg-preview.png"
+import ChatProvider from "../Context/ChatProvider"
 
 function Homepage() {
   const history = useHistory();

@@ -3,9 +3,6 @@ const Chat = require("../models/chatModel");
 const User = require("../models/userModel");
 
 const accessChat = asycnHandler(async (req, res, next) => {
-  // add, create chat 1-1
-  // 1. gui id ->
-  // 2. Co User : tìm hết tất cả các Chat của User đó ->
   const { userId } = req.body;
   if (!userId) {
     console.log("UserId not send with request ");
@@ -90,11 +87,17 @@ const accessChatMobile = asycnHandler(async (req, res, next) => {
 const fetchChat = asycnHandler(async (req, res) => {
   // get all from user cu the
   try {
-    Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
+    Chat.find({
+      $and: [
+        { users: { $elemMatch: { $eq: req.user._id } } },
+        { latestMessage: { $ne: null } },
+      ],
+    })
       .populate("users", "-password")
       .populate("groupAdmin", "-password")
       .populate("latestMessage")
-      .sort({ updateAt: -1 })
+      // .populate({ path: "latestMessage" })
+      .sort({ updateAt: 1 })
       .then(async (rs) => {
         rs = await User.populate(rs, {
           path: "latestMessage.sender",
@@ -210,18 +213,17 @@ const removeFromGroup = asycnHandler(async (req, res, next) => {
   }
 });
 const searchGroupChat = asycnHandler(async (req, res) => {
-  const keyword = req.query.search
-    ? {
-        // $or: [
-        //   { name: { $regex: req.query.search, $options: "i" } },
-        //   { email: { $regex: req.query.search, $options: "i" } },
-        // ],
-        chatName: { $regex: req.query.search, $options: "i" },
-      }
-    : {};
-
-  const chats = await Chat.find(keyword);
-  res.send(chats);
+  try {
+    const chats = await Chat.find({
+      users: { $elemMatch: { $eq: req.query.id } },
+    }).find({
+      chatName: { $regex: req.query.chatName, $options: "i" },
+    });
+    res.send(chats);
+  } catch (error) {
+    res.status(404);
+    throw new Error("Chat is not found");
+  }
 });
 
 module.exports = {

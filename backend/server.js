@@ -11,17 +11,17 @@ const PORT = process.env.PORT;
 const { notFound, errorHandler } = require("./middleware/errorHandler");
 connectDB();
 app.use(express.json());
-
+const path = require("path");
+const rootPath = path.resolve();
+app.use(express.static("./public"));
+app.set("view engine", "ejs");
+app.set("views", `${rootPath}/backend/views`);
 app.use("/api/user", userRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/message", messageRouter);
 app.use("/api/friend", friendRouter);
-// app.get("/call", (req, res) => {
-//   res.render("home");
-// })
 // token:
-// thoai phuong
-//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNDZjNzgwZDkwMjVkY2RiMTJhNDAxNSIsImlhdCI6MTY2NTU4Mjk3NywiZXhwIjoxNjY4MTc0OTc3fQ.ZhYjZ5wC0LyUHwbbezNN0lkYuXu6s5I4Y-oRvrJZeOM
+//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNjU0NzIxMjcwMTZmMGE0OWYwM2YzNiIsImlhdCI6MTY2NzU4MTgxOCwiZXhwIjoxNjcwMTczODE4fQ.mlMzFsTLQvFu7Bq6gWQ7mJbLBozSEIXZBY8ZMjTWOGw
 app.use(notFound);
 app.use(errorHandler);
 const server = app.listen(PORT, () => {
@@ -32,11 +32,9 @@ const io = require("socket.io")(server, {
   // waiting time server ko connect
   pingTimeout: 60000,
   cors: {
-    // origin: "http://localhost:3000"
-    origin:"*"
+    origin: "*",
   },
 });
-
 io.on("connection", (socket) => {
   console.log(socket.id, " connected !!!");
   socket.on("setup", (userData) => {

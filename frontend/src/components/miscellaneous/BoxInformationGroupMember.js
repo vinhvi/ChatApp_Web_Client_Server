@@ -1,6 +1,7 @@
-// import { InfoOutlineIcon } from "@chakra-ui/icons";
+import { InfoOutlineIcon } from "@chakra-ui/icons";
 import {
   Button,
+  Image,
   FormControl,
   Input,
   useToast,
@@ -15,6 +16,7 @@ import {
 import axios from "axios";
 import { useState } from "react";
 import { ChatState } from "../../Context/ChatProvider";
+import UserBadgeItem from "../userAvatar/UserBadgeItem";
 import UserListItem from "../userAvatar/UserListItem";
 import UserListItemGroup from "../userAvatar/UserListItemGroup";
 

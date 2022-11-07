@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 // import {useState} from "react-usestateref"
 import { useHistory } from "react-router-dom";
+import Chatpage from "../Pages/Chatpage";
+import { Route } from "react-router-dom";
 
 export const ChatContext = createContext({});
 // contextAPI: qly state of our app -> fetch state directly from 1 place
@@ -13,10 +15,9 @@ const ChatProvider = ({ children }) => {
   );
   const [notification, setNotification] = useState([]);
   const [chats, setChats] = useState([]);
-  const [socket, setsocket] = useState();
+  const [socket, setSocket] = useState();
   const [input, setInput] = useState([]);
   const history = useHistory();
-
 
   useEffect(() => {
     if (user) {
@@ -37,7 +38,7 @@ const ChatProvider = ({ children }) => {
         chats,
         setChats,
         socket,
-        setsocket,
+        setSocket,
         input,
         setInput,
       }}

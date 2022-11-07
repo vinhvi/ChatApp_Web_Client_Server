@@ -1,7 +1,7 @@
 import { Box, Text } from "@chakra-ui/layout";
 import "./styles.css";
 import { IconButton, Spinner, useToast, Image } from "@chakra-ui/react";
-import { getSender } from "../config/ChatLogics";
+import { getSender, getSenderFull } from "../config/ChatLogics";
 import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useDisclosure } from "@chakra-ui/hooks";
@@ -10,7 +10,6 @@ import { ArrowBackIcon, InfoOutlineIcon, PhoneIcon } from "@chakra-ui/icons";
 import ScrollableChat from "./ScrollableChat";
 import animationData from "../animations/typing.json";
 import Lottie from "react-lottie";
-// import callwindow from "./Call/callwindow";
 
 import {
   Drawer,
@@ -24,19 +23,17 @@ import BoxInfoFile from "./miscellaneous/BoxInfoFile";
 
 import { ChatState } from "../Context/ChatProvider";
 ///////SOCKET///////
-import io from "socket.io-client";
 import BoxInfoIamge from "./miscellaneous/BoxInforImage";
+import io from "socket.io-client";
 import InputComponent from "./ChatComponent/InputComponent";
 
-const ENDPOINT = "http://172.16.10.53:5000"; // socket den
+const ENDPOINT = "http://localhost:5000"; // socket den
 var socket, selectedChatCompare;
 //////SOCKET//////
 const openNewWindow = () => {
   // console.log("hello ko ra");
   const params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=300,height=300`;
   window.open("http://localhost:3002", "tri", params);
-
-  // newWindow.postMessage({ foo: "xxxxxxxxxxxxxxxxxxxxxx" }, "*");
 };
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
@@ -53,6 +50,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [loading, setLoading] = useState(false); // load, xoay vong vong
   const [socketConnected, setSocketConnected] = useState(false);
 
+  const [pic, setPic] = useState();
   const [istyping, setIsTyping] = useState(false);
   const toast = useToast();
 
@@ -65,9 +63,9 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     setSelectedChat,
     user,
     setuser,
-    setsocket,
     notification,
     setNotification,
+    setSocket,
   } = ChatState();
   const user1 = JSON.parse(localStorage.getItem("userInfo"));
 
@@ -105,16 +103,16 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
   ///////////SOCKET////////////////////
   useEffect(() => {
-    if(!socket){
+    if (!socket) {
       socket = io(ENDPOINT);
       socket.emit("setup", user);
       socket.on("connected", () => setSocketConnected(true)); // client nhận được rồi mơi save dô client
       socket.on("typing", () => setIsTyping(true));
       socket.on("stop typing", () => setIsTyping(false));
+      console.log("SINGLE CHAT:", socket);
     }
-    setsocket(socket)
+    setSocket(socket);
   }, []);
-  console.log("single chat: ", socket);
 
   useEffect(() => {
     socket.on("recalled mess", (mess) => {
@@ -133,14 +131,14 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
   const xuLyRecall = (messages, data) => {
     messages.forEach((messa) => {
-      if (messa._id === data._id) {
+      if (messa._id == data._id) {
         messa.recallMessage = 1;
       }
     });
   };
 
   useEffect(() => {
-    if (user === null) {
+    if (user == null) {
       setuser(user1);
       history.go(0);
     }
@@ -156,7 +154,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       if (
         !selectedChatCompare || // if chat is not selected or doesn't match current chat
         selectedChatCompare._id !== newMessageRecieved.chat._id ||
-        selectedChatCompare === undefined
+        selectedChatCompare == undefined
       ) {
         if (!notification.includes(newMessageRecieved)) {
           // set notification
@@ -353,7 +351,3 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 };
 
 export default SingleChat;
-
-{
-  /* Ko là group chat -> thì hiện tên user*/
-}

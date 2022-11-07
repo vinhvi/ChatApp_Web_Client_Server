@@ -60,6 +60,7 @@ function SideDrawer() {
     chats,
     setChats,
     input,
+    setInput,
   } = ChatState();
   useEffect(() => {
     console.log("MY CHAT: ", input);

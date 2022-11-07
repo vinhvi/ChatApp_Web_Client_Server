@@ -3,6 +3,8 @@ const User = require("../models/userModel");
 const generateToken = require("../config/generateToken");
 const mailer = require("../utils/mailer");
 const bcryptjs = require("bcryptjs");
+var ip = require("ip");
+// console.dir(ip.address());
 const register = asyncHandler(async (req, res) => {
   const { name, email, password, pic } = req.body;
   if (!name || !email || !password) {
@@ -28,7 +30,9 @@ const register = asyncHandler(async (req, res) => {
       mailer.sendMail(
         user.email,
         "Verify Email",
-        `<a href="${process.env.APP_URL}api/user/verify?email=${user.email}&token=${hashMail}">Verify</a>`
+        `<a href="http://${ip.address()}:5000/api/user/verify?email=${
+          user.email
+        }&token=${hashMail}">Verify</a>`
       );
     });
     res.status(200).json({
@@ -91,10 +95,13 @@ const verify = asyncHandler(async (req, res) => {
         { email: req.query.email },
         { email: req.query.email, email_verified_at: new Date() },
         (err, data) => {
-          err ? console.log(err) : console.log("XONG XONG XONG");
+          if (err) console.log(err);
+          else {
+            console.log("XONG XONG XONG");
+            res.render("thanks");
+          }
         }
       );
-      // res.redirect("");
     } else {
       console.log("Ko tim ra");
     }

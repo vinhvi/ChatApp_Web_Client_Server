@@ -54,5 +54,5 @@ export const showMenu = (m, i, userId) => {
 
 // Message Private - Message nhom
 export const getSenderPic = (loggedUser, users) => {
-  return users[0]._id == loggedUser._id ? users[1].pic : users[0].pic;
+  return users[0]._id === loggedUser._id ? users[1].pic : users[0].pic;
 };

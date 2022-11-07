@@ -12,7 +12,7 @@ import { useHistory } from "react-router-dom";
 
 const Login = () => {
   const [show, setShow] = useState(false);
-  const handleClick = () => setShow(!show);
+  // const handleClick = () => setShow(!show);
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [loading, setLoading] = useState(false);
@@ -77,7 +77,6 @@ const Login = () => {
           // value={email}
           type="email"
           placeholder="Enter Your Email Address"
-          id="email1"
           onChange={(e) => setEmail(e.target.value)}
         />
       </FormControl>
@@ -86,15 +85,14 @@ const Login = () => {
         <InputGroup size="md">
           <Input
             // value={password}
-            id="password1"
             onChange={(e) => setPassword(e.target.value)}
             type={show ? "text" : "password"}
             placeholder="Enter password"
           />
           <InputRightElement width="4.5rem">
-          <Button h="1.75rem" size="sm" onClick={handleClick}>
+            {/* <Button h="1.75rem" size="sm" onClick={handleClick}>
               {show ? "Hide" : "Show"}
-            </Button>
+            </Button> */}
           </InputRightElement>
         </InputGroup>
       </FormControl>

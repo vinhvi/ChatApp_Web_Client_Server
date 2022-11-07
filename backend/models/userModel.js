@@ -6,6 +6,20 @@ const userSchema = mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    // birth: {
+    //   type: Date,
+    // },
+    // phone: {
+    //   type: String,
+    //   require: true,
+    //   unique: true,
+    // },
+    // cover: {
+    //   type: String,
+    //   require: true,
+    //   default:
+    //     "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
+    // },
     pic: {
       type: String,
       require: true,

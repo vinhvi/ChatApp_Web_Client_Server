@@ -3,7 +3,7 @@ import { Box, Stack, Text } from "@chakra-ui/layout";
 import { useToast } from "@chakra-ui/toast";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { getSender, getSenderPic } from "../config/ChatLogics";
+import { getSender, getSenderPic, getSenderYou } from "../config/ChatLogics";
 import ChatLoading from "./ChatLoading";
 import GroupChatModal from "./miscellaneous/GroupChatModal";
 import { Button } from "@chakra-ui/react";
@@ -11,17 +11,21 @@ import { ChatState } from "../Context/ChatProvider";
 import { useHistory } from "react-router-dom";
 import { Avatar } from "@chakra-ui/avatar";
 import io from "socket.io-client";
-
-
-const ENDPOINT = "http://localhost:5000"; // socket den
-var socket;
+const ENDPOINT = "http://localhost:5000";
 const MyChats = ({ fetchAgain }) => {
   const [loggedUser, setLoggedUser] = useState(
     JSON.parse(localStorage.getItem("userInfo"))
   );
 
-  const { user, setuser, selectedChat, setSelectedChat, chats,  setChats } =
-    ChatState();
+  const {
+    user,
+    setuser,
+    selectedChat,
+    setSelectedChat,
+    chats,
+    setChats,
+    socket,
+  } = ChatState();
 
   const toast = useToast();
 
@@ -36,25 +40,32 @@ const MyChats = ({ fetchAgain }) => {
       minute: "2-digit",
     });
   };
+  const xuLyChats = (chats, newMessageRecieved) => {
+    chats.forEach((chat) => {
+      if (chat._id === newMessageRecieved._id)
+        chat.latestMessage = newMessageRecieved;
+    });
+  };
+  useEffect(() => {
+    // socket.on("message recieved", (newMessageRecieved) => {
+    //   xuLyChats(chats, newMessageRecieved);
+    // });
+    // console.log("SOCKET MYCHAT: ", socket);
+    // socket.on("message recieved", (newMessageRecieved) => {
+    //   console.log("MY CHAT SOCKET");
+    // });
+    console.log("MY CHAT: ", socket);
+    // socket = io(ENDPOINT);
+    // socket.emit("myChat", "TUI LA MY CHAT SOCKET");
+  });
 
   useEffect(() => {
     setuser(loggedUser);
-    if (loggedUser === null) {
+    if (loggedUser == null) {
       history.go(0);
     }
     fetchChats();
   }, [fetchAgain]);
-
-  useEffect(() => {
-    if(!socket){
-      socket = io(ENDPOINT);
-      socket.emit("setup", user); // client nhận được rồi mơi save dô client
-     
-    }
-    // setsocket(socket)
-  }, []);
-
-  console.log("socket mychat", socket);
 
   const fetchChats = async () => {
     try {
@@ -66,10 +77,11 @@ const MyChats = ({ fetchAgain }) => {
       const { data } = await axios.get("/api/chat", config);
       // console.log("XXX", user.token);
       setChats(data);
+      // console.log("MYCHAT socket:", socket);
     } catch (error) {
       toast({
         title: "Error Occured!",
-        description: "Failed to Load the chats",
+        description: "Failed to Load the chats (MY CHAT)",
         status: "error",
         duration: 5000,
         isClosable: true,

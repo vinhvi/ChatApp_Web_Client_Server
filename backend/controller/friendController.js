@@ -1,6 +1,20 @@
 const asyncHandler = require("express-async-handler");
 const Friend = require("../models/friendModel");
 const User = require("../models/userModel");
+const checkTonTai = asyncHandler(async (req, res) => {
+  try {
+    var check = await Friend.find({
+      $or: [
+        { $and: [{ user: req.body.user }, { friend: req.body.friend }] },
+        { $and: [{ friend: req.body.user }, { user: req.body.friend }] },
+      ],
+    });
+    res.json(check);
+  } catch (error) {
+    res.status(400);
+    throw new Error(error.message);
+  }
+});
 
 const sendRequest = asyncHandler(async (req, res) => {
   if (!req.body.user || !req.body.friend) {
@@ -11,15 +25,26 @@ const sendRequest = asyncHandler(async (req, res) => {
     user: req.body.user,
     friend: req.body.friend,
   };
-  try {
-    var requestFriend = await Friend.create(sendRequestFriend);
-    requestFriend = await requestFriend.populate("user", "-password");
-    requestFriend = await requestFriend.populate("friend", "-password");
-    console.log(requestFriend);
-    res.json(requestFriend);
-  } catch (error) {
-    res.status(400);
-    throw new Error(error.message);
+  var check = await Friend.find({
+    $or: [
+      { $and: [{ user: req.body.user }, { friend: req.body.friend }] },
+      { $and: [{ friend: req.body.user }, { user: req.body.friend }] },
+    ],
+  });
+  if (check.length > 0) {
+    console.log("Co roi: ", check);
+    res.json(check);
+  } else {
+    try {
+      var requestFriend = await Friend.create(sendRequestFriend);
+      requestFriend = await requestFriend.populate("user", "-password");
+      requestFriend = await requestFriend.populate("friend", "-password");
+      console.log(requestFriend);
+      res.json(requestFriend);
+    } catch (error) {
+      res.status(400);
+      throw new Error(error.message);
+    }
   }
 });
 const unfriend = asyncHandler(async (req, res) => {
@@ -30,14 +55,12 @@ const unfriend = asyncHandler(async (req, res) => {
   try {
     var requestFriend = await Friend.findOneAndDelete({
       $or: [
-        { user: req.body.friend, friend: req.body.user },
-        { user: req.body.user, friend: req.body.friend },
+        { $and: [{ user: req.body.user }, { friend: req.body.friend }] },
+        { $and: [{ friend: req.body.user }, { user: req.body.friend }] },
       ],
     });
-    requestFriend = await requestFriend.populate("user", "-password");
-    requestFriend = await requestFriend.populate("friend", "-password");
     console.log(requestFriend);
-    // res.json(requestFriend)
+    res.json(requestFriend);
   } catch (error) {
     res.status(400);
     throw new Error(error.message);
@@ -48,46 +71,66 @@ const makeFriend = asyncHandler(async (req, res) => {
     console.log("Chưa có user, friend");
     return res.sendStatus(400);
   }
-  try {
-    var requestFriend = await Friend.findOneAndUpdate(
-      { user: req.body.friend, friend: req.body.user },
-      { friend: req.body.user, status: 2 } ///////
-    );
-    requestFriend = await requestFriend.populate("user", "-password");
-    requestFriend = await requestFriend.populate("friend", "-password");
-    console.log("MAKE FRIEND", requestFriend);
-    res.json(requestFriend);
-  } catch (error) {
-    res.status(400);
-    throw new Error(error.message);
+  var check = await Friend.find({
+    $or: [
+      { $and: [{ user: req.body.user }, { friend: req.body.friend }] },
+      { $and: [{ friend: req.body.user }, { user: req.body.friend }] },
+    ],
+  });
+  if (check.length == 0) {
+    console.log("Chua co sao update");
+    res.send(check);
+  } else {
+    try {
+      var requestFriend = await Friend.findOneAndUpdate(
+        { user: req.body.friend, friend: req.body.user },
+        { friend: req.body.user, status: 2 } ///////
+      );
+      requestFriend = await requestFriend.populate("user", "-password");
+      requestFriend = await requestFriend.populate("friend", "-password");
+      console.log("MAKE FRIEND", requestFriend);
+      res.json(requestFriend);
+    } catch (error) {
+      res.status(400);
+      throw new Error(error.message);
+    }
   }
 });
 const getListFriend = asyncHandler(async (req, res) => {
-  if (!req.body.userId) {
+  var userId = req.body.userId;
+  if (!userId) {
     console.log("Chua co User");
     return res.sendStatus(400);
   } else {
-    const getListFriend = await Friend.find({ status: 2 })
-      .find({
-        $or: [{ user: req.body.userId }, { friend: req.body.userId }],
-      })
-      .find({
-        status: 2,
-      })
-      .populate("user")
-      .populate("friend")
-      .select("user friend -_id");
-    // const listUse = await User.populate(getListFriend, {
-    //   path: "user friend",
-    // });
-    // res.send(listUse);
-    res.send(getListFriend);
+    try {
+      var listFriend = [];
+      const getListFriend = await Friend.find({ status: 2 }).select(
+        "user friend -_id"
+      );
+      getListFriend.forEach((friend) => {
+        if (!friend.user._id.toString().includes(userId))
+          listFriend.push(friend.user._id.toString());
+        if (!friend.friend._id.toString().includes(userId))
+          listFriend.push(friend.friend._id.toString());
+      });
+      var kq = [];
+      listFriend.forEach(async (user) => {
+        var temp = await User.findOne({ _id: user });
+        kq.push(temp);
+      });
+      setTimeout(() => {
+        res.json(kq);
+      }, 3000);
+    } catch (error) {
+      res.status(400);
+      throw new Error(error.message);
+    }
   }
 });
-
 module.exports = {
   sendRequest,
   unfriend,
   makeFriend,
   getListFriend,
+  checkTonTai,
 };

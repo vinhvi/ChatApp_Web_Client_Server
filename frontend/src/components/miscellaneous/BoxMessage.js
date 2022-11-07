@@ -21,7 +21,7 @@ import { Avatar } from "@chakra-ui/avatar";
 import { Tooltip } from "@chakra-ui/tooltip";
 import { ChatState } from "../../Context/ChatProvider";
 import ProfileModal from "./ProfileModal";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { DragHandleIcon, RepeatIcon } from "@chakra-ui/icons";
 import axios from "axios";
 
@@ -32,8 +32,6 @@ const BoxMessage = ({ messages, m, i, socket }) => {
   const [mess, setmess] = useState();
   const toast = useToast();
   const ref = useRef(null);
-  // const {socket} = ChatState();
-
   const handlePic = (pic) => {
     if (pic) {
       displayText = "none";
@@ -42,7 +40,7 @@ const BoxMessage = ({ messages, m, i, socket }) => {
   };
 
   const handleContent = (content) => {
-    if (content !== "image") {
+    if (content != "image") {
       displayText = "block";
       // console.log("content", content);
       return content;
@@ -67,7 +65,6 @@ const BoxMessage = ({ messages, m, i, socket }) => {
   const handleShowMenu = () => {
     setIsShown("flex");
     setmess(m);
-
     return ref.current.offsetWidth;
   };
 
@@ -77,8 +74,6 @@ const BoxMessage = ({ messages, m, i, socket }) => {
       return;
     } else {
       try {
-        console.log("AXIOS");
-        console.log("MESS ID:", mess);
         const config = {
           headers: {
             "Content-type": "application/json",
@@ -110,7 +105,7 @@ const BoxMessage = ({ messages, m, i, socket }) => {
 
   const xuLyMess = (messages, data) => {
     messages.forEach((messa) => {
-      if (messa._id === data._id) {
+      if (messa._id == data._id) {
         messa.content = "BOX MESSAGE";
         mess.recallMessage = 1;
       }
@@ -138,8 +133,6 @@ const BoxMessage = ({ messages, m, i, socket }) => {
         )}
         {!m.recallMessage && (
           <>
-            {/* - bên gửi, bên nhận -> nhận margin khác nhau
-            - 2 tin nhắn của cùng 1 user thì sẽ có cùng margin top */}
             <Box
               w="100%"
               h="25%"
@@ -149,17 +142,17 @@ const BoxMessage = ({ messages, m, i, socket }) => {
                 setIsShown("none");
                 setmess(null);
               }}
-              bg="gray"
             >
               {m.content === "image" ? (
                 <>
-                <Box
+                  <Box
                     display="flex"
                     bg="red"
-                    width="100%"
+                    right="230px"
+                    // width="10%"
                     justifyContent={"space-between"}
                   >
-                    {/* <Menu>
+                    <Menu>
                       <MenuButton
                         as={IconButton}
                         fontSize="15px"
@@ -180,7 +173,7 @@ const BoxMessage = ({ messages, m, i, socket }) => {
                         // zIndex={2}
                         style={{
                           // margin: showMenu(messages, m, i, user._id),
-                          right: showMenu(m, i, user._id) ? 0 : -240,
+                          right: showMenu(m, i, user._id) ? 0 : -400,
                           zIndex: "2",
                           d: "flex",
                           position: "absolute",
@@ -193,7 +186,8 @@ const BoxMessage = ({ messages, m, i, socket }) => {
                         </MenuItem>
                         <MenuDivider />
                       </MenuList>
-                    </Menu> */}
+                    </Menu>
+                  </Box>
                   <Box
                     style={{
                       margin: isSameSenderMargin(messages, m, i, user._id),
@@ -206,8 +200,6 @@ const BoxMessage = ({ messages, m, i, socket }) => {
                     ref={ref}
                   >
                     <Image borderRadius={5} src={handlePic(m.pic)} />
-                  </Box>
-                  
                   </Box>
                 </>
               ) : (

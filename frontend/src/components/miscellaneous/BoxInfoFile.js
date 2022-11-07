@@ -1,25 +1,32 @@
-
+import { InfoOutlineIcon } from "@chakra-ui/icons";
 import {
+  Button,
   Image,
-  // useToast,
+  FormControl,
+  Input,
+  useToast,
   Box,
   Accordion,
   AccordionItem,
   AccordionButton,
   AccordionPanel,
   AccordionIcon,
-  // Spinner,
+  Spinner,
 } from "@chakra-ui/react";
-// import { useState } from "react";
+import axios from "axios";
+import { useState } from "react";
 import { ChatState } from "../../Context/ChatProvider";
+import UserBadgeItem from "../userAvatar/UserBadgeItem";
+import UserListItem from "../userAvatar/UserListItem";
+import UserListItemGroup from "../userAvatar/UserListItemGroup";
 
 const BoxInfoFile = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
-  // const [groupChatName, setGroupChatName] = useState();
-  // const [search, setSearch] = useState("");
-  // const [searchResult, setSearchResult] = useState([]);
-  // const [loading, setLoading] = useState(false);
-  // const [renameloading, setRenameLoading] = useState(false);
-  // const toast = useToast();
+  const [groupChatName, setGroupChatName] = useState();
+  const [search, setSearch] = useState("");
+  const [searchResult, setSearchResult] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [renameloading, setRenameLoading] = useState(false);
+  const toast = useToast();
 
   const { selectedChat, setSelectedChat, user } = ChatState();
   

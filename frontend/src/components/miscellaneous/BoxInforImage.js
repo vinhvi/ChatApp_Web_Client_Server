@@ -1,6 +1,9 @@
-
+import { InfoOutlineIcon } from "@chakra-ui/icons";
 import {
+  Button,
   Image,
+  FormControl,
+  Input,
   useToast,
   Box,
   Accordion,
@@ -8,12 +11,13 @@ import {
   AccordionButton,
   AccordionPanel,
   AccordionIcon,
+  Spinner,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { ChatState } from "../../Context/ChatProvider";
 
-const BoxInfoIamge = () => {
+const BoxInfoIamge = ({  }) => {
   const [loading, setLoading] = useState(false);
   const [pics, setPics] = useState([]);
   const toast = useToast();
