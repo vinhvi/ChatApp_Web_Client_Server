@@ -6,19 +6,22 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
-  Text,
+  Image,
 } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { useHistory } from "react-router";
 import Login from "../components/Authentication/Login";
 import Signup from "../components/Authentication/Signup";
+import logo from "../img/message-logo-removebg-preview.png"
 
 function Homepage() {
   const history = useHistory();
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("userInfo"));
+    console.log("Home page: ", user);
     if (user) {
+      
       history.push("/chats");
     }
   }, [history]);
@@ -34,13 +37,15 @@ function Homepage() {
         m="40px 0 15px 0"
         borderRadius="lg"
         borderWidth="1px"
+        mt="10rem"
       >
-        <Text fontSize="4xl" fontFamily="Work sans">
+        {/* <Text fontSize="4xl" fontFamily="Work sans">
           Hoang Chi
-        </Text>
+        </Text> */}
+        <Image src={logo} w="37%"/>
       </Box>
       <Box bg="white" w="100%" p={4} borderRadius="lg" borderWidth="1px">
-        <Tabs isFitted variant="soft-rounded">
+        <Tabs isFitted variant="soft-rounded" colorScheme="green">
           <TabList mb="1em">
             <Tab>Login</Tab>
             <Tab>Sign Up</Tab>

@@ -67,21 +67,20 @@ const getListFriend = asyncHandler(async (req, res) => {
     console.log("Chua co User");
     return res.sendStatus(400);
   } else {
-    try {
-      const getListFriend = await Friend.find({ status: 2 })
-        .select("user friend -_id")
-        .then(async (rs) => {});
-      // .populate("user")
-      // .populate("friend")
-      // const listUse = await User.populate(getListFriend, {
-      //   path: "user friend",
-      // });
-
-      res.send(getListFriend);
-    } catch (error) {
-      res.status(400);
-      throw new Error(error.message);
-    }
+    const getListFriend = await Friend.find({ status: 2 })
+      .find({
+        $or: [{ user: req.body.userId }, { friend: req.body.userId }],
+      })
+      .find({
+        status: 2,
+      })
+      .populate("user")
+      .populate("friend")
+      .select("user friend -_id");
+    // const listUse = await User.populate(getListFriend, {
+    //   path: "user friend",
+    // });
+    // res.send(listUse);
     res.send(getListFriend);
   }
 });

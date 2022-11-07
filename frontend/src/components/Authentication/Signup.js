@@ -63,15 +63,16 @@ const Signup = () => {
       );
       console.log(data);
       toast({
-        title: "Registration Successful",
+        title:
+          "Please check your email for further instructions on how to complete your account register.",
         status: "success",
-        duration: 5000,
+        duration: 7000,
         isClosable: true,
         position: "bottom",
       });
-      localStorage.setItem("userInfo", JSON.stringify(data));
+      // localStorage.setItem("userInfo", JSON.stringify(data));
       setLoading(false);
-      history.push("/chats");
+      history.push("/");
     } catch (error) {
       toast({
         title: "Error Occured!",
@@ -153,6 +154,7 @@ const Signup = () => {
           <Input
             type={show ? "text" : "password"}
             placeholder="Enter Password"
+            id="pass1"
             onChange={(e) => setPassword(e.target.value)}
           />
           <InputRightElement width="4.5rem">
@@ -168,6 +170,7 @@ const Signup = () => {
           <Input
             type={show ? "text" : "password"}
             placeholder="Confirm password"
+            id="pass2"
             onChange={(e) => setConfirmpassword(e.target.value)}
           />
           <InputRightElement width="4.5rem">

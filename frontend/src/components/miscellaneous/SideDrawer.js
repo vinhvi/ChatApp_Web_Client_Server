@@ -9,6 +9,18 @@ import {
   MenuItem,
   MenuList,
 } from "@chakra-ui/menu";
+import { HiHome } from "react-icons/hi2";
+import { FaUserFriends } from "react-icons/fa";
+import { TiGroup } from "react-icons/ti";
+import { MdOutlineLiveTv } from "react-icons/md";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  IconButton,
+  AccordionIcon,
+} from "@chakra-ui/react";
 import {
   Drawer,
   DrawerBody,
@@ -20,7 +32,7 @@ import { Tooltip } from "@chakra-ui/tooltip";
 import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { Avatar } from "@chakra-ui/avatar";
 import { useHistory } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useToast } from "@chakra-ui/toast";
 import ChatLoading from "../ChatLoading";
@@ -31,28 +43,43 @@ import { Effect } from "react-notification-badge";
 import { getSender } from "../../config/ChatLogics";
 import UserListItem from "../userAvatar/UserListItem";
 import { ChatState } from "../../Context/ChatProvider";
+import GroupListItem from "../userAvatar/GroupListItem";
 
 function SideDrawer() {
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
+  const [searchResultGroup, setsearchResultGroup] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
 
   const {
     setSelectedChat,
-    user,
+    setuser,
     notification,
     setNotification,
     chats,
     setChats,
+    input,
   } = ChatState();
+  useEffect(() => {
+    console.log("MY CHAT: ", input);
+  }, [input]);
+  const user = JSON.parse(localStorage.getItem("userInfo"));
+  const history = useHistory();
+  useEffect(() => {
+    if (user == null) {
+      history.go(0);
+    }
+
+    console.log("side drawer :", user);
+  }, []);
 
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const history = useHistory();
 
   const logoutHandler = () => {
     console.log("Out", user);
+    setuser(null);
     localStorage.removeItem("userInfo");
     history.push("/");
   };
@@ -92,11 +119,35 @@ function SideDrawer() {
         position: "bottom-left",
       });
     }
+
+    try {
+      setLoading(true);
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      const { data } = await axios.get(
+        `/api/chat/searchGroupChat?chatName=${search}&id=${user._id}`,
+        config
+      );
+      setLoading(false);
+      setsearchResultGroup(data);
+    } catch (error) {
+      toast({
+        title: "Error Occured!",
+        description: error,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
   };
 
   const accessChat = async (userId) => {
-    console.log(userId);
-
     try {
       setLoadingChat(true);
       const config = {
@@ -105,8 +156,8 @@ function SideDrawer() {
           Authorization: `Bearer ${user.token}`,
         },
       };
+      // const { data } = await axios.post(`/api/chat`, { userId }, config);
       const { data } = await axios.post(`/api/chat`, { userId }, config);
-
       if (!chats.find((c) => c._id === data._id)) setChats([data, ...chats]);
       setSelectedChat(data);
       setLoadingChat(false);
@@ -129,10 +180,9 @@ function SideDrawer() {
         d="flex"
         justifyContent="space-between"
         alignItems="center"
-        bg="white"
+        bg="#05BC05"
         w="100%"
         p="5px 10px 5px 10px"
-        borderWidth="5px"
       >
         <Tooltip label="Search Users to chat" hasArrow placement="bottom-end">
           <Button variant="ghost" onClick={onOpen}>
@@ -142,9 +192,39 @@ function SideDrawer() {
             </Text>
           </Button>
         </Tooltip>
-        <Text fontSize="2xl" fontFamily="Work sans">
-          Hoang Chi Chat
-        </Text>
+        <Box w="450px" d="flex" justifyContent="space-between">
+          <IconButton
+            variant="ghost"
+            fontSize="35px"
+            size="lg"
+            onClick={() => {
+              history.push("/chats");
+            }}
+            icon={<HiHome color="white" />}
+          />
+          <IconButton
+            variant="ghost"
+            fontSize="35px"
+            size="lg"
+            onClick={() => {
+              history.push("/friend");
+            }}
+            icon={<FaUserFriends color="white" />}
+          />
+          <IconButton
+            variant="ghost"
+            fontSize="35px"
+            size="lg"
+            icon={<TiGroup color="white" />}
+          />
+
+          <IconButton
+            variant="ghost"
+            fontSize="35px"
+            size="lg"
+            icon={<MdOutlineLiveTv color="white" />}
+          />
+        </Box>
         <div>
           <Menu>
             <MenuButton p={1}>
@@ -152,7 +232,7 @@ function SideDrawer() {
                 count={notification.length}
                 effect={Effect.SCALE}
               />
-              <BellIcon fontSize="2xl" m={1} />
+              <BellIcon fontSize="2xl" m={1} color="white" />
             </MenuButton>
             <MenuList pl={2}>
               {!notification.length && "No New Messages"}
@@ -171,6 +251,7 @@ function SideDrawer() {
               ))}
             </MenuList>
           </Menu>
+
           <Menu>
             <MenuButton as={Button} bg="white" rightIcon={<ChevronDownIcon />}>
               <Avatar
@@ -208,13 +289,49 @@ function SideDrawer() {
             {loading ? (
               <ChatLoading />
             ) : (
-              searchResult?.map((user) => (
-                <UserListItem
-                  key={user._id}
-                  user={user}
-                  handleFunction={() => accessChat(user._id)}
-                />
-              ))
+              <Accordion defaultIndex={[0]} allowMultiple>
+                {searchResult.length > 0 && (
+                  <AccordionItem>
+                    <AccordionButton>
+                      <Box flex="1" textAlign="left" fontWeight="bold">
+                        Individual ({searchResult.length})
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                    <AccordionPanel pb={4}>
+                      {searchResult?.map((user, i) => (
+                        <UserListItem
+                          key={user._id}
+                          user={user}
+                          handleFunction={() => accessChat(user._id)}
+                        />
+                      ))}
+                    </AccordionPanel>
+                  </AccordionItem>
+                )}
+
+                {searchResultGroup.length > 0 && (
+                  <AccordionItem>
+                    <h2>
+                      <AccordionButton>
+                        <Box flex="1" textAlign="left" fontWeight="bold">
+                          Group ({searchResultGroup.length})
+                        </Box>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel pb={4}>
+                      {searchResultGroup?.map((chat, i) => (
+                        <GroupListItem
+                          key={chat._id}
+                          chat={chat}
+                          handleFunction={() => accessChat(chat._id)}
+                        />
+                      ))}
+                    </AccordionPanel>
+                  </AccordionItem>
+                )}
+              </Accordion>
             )}
             {/* Cái cục xoay xoay ở dưới cái kq tìm kím */}
             {loadingChat && <Spinner ml="auto" d="flex" />}

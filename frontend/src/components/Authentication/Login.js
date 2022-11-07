@@ -7,9 +7,12 @@ import axios from "axios";
 import { useToast } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 
+// var emailExport = '';
+// var passwordExport = '';
+
 const Login = () => {
   const [show, setShow] = useState(false);
-  // const handleClick = () => setShow(!show);
+  const handleClick = () => setShow(!show);
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [loading, setLoading] = useState(false);
@@ -49,12 +52,14 @@ const Login = () => {
         position: "bottom",
       });
       localStorage.setItem("userInfo", JSON.stringify(data));
+
       setLoading(false);
-      history.push("/chats");
+      history.push("/provider");
     } catch (error) {
       toast({
         title: "Error Occured!",
         description: error.response.data.message,
+        // description: "LYour pass",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -69,9 +74,10 @@ const Login = () => {
       <FormControl id="email" isRequired>
         <FormLabel>Email Address</FormLabel>
         <Input
-          value={email}
+          // value={email}
           type="email"
           placeholder="Enter Your Email Address"
+          id="email1"
           onChange={(e) => setEmail(e.target.value)}
         />
       </FormControl>
@@ -79,20 +85,21 @@ const Login = () => {
         <FormLabel>Password</FormLabel>
         <InputGroup size="md">
           <Input
-            value={password}
+            // value={password}
+            id="password1"
             onChange={(e) => setPassword(e.target.value)}
             type={show ? "text" : "password"}
             placeholder="Enter password"
           />
           <InputRightElement width="4.5rem">
-            {/* <Button h="1.75rem" size="sm" onClick={handleClick}>
+          <Button h="1.75rem" size="sm" onClick={handleClick}>
               {show ? "Hide" : "Show"}
-            </Button> */}
+            </Button>
           </InputRightElement>
         </InputGroup>
       </FormControl>
       <Button
-        colorScheme="blue"
+        colorScheme="green"
         width="100%"
         style={{ marginTop: 15 }}
         onClick={submitHandler}

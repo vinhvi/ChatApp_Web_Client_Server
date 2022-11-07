@@ -50,7 +50,6 @@ const GroupChatModal = ({ children }) => {
     if (!query) {
       return;
     }
-
     try {
       setLoading(true);
       const config = {
@@ -127,7 +126,7 @@ const GroupChatModal = ({ children }) => {
 
   return (
     <>
-      <span onClick={onOpen}>{children}</span>
+      <div onClick={onOpen}>{children}</div>
 
       <Modal onClose={onClose} isOpen={isOpen} isCentered>
         <ModalOverlay />

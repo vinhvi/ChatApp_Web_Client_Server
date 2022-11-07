@@ -6,15 +6,15 @@ export const isSameSenderMargin = (messages, m, i, userId) => {
     messages[i + 1].sender._id === m.sender._id &&
     messages[i].sender._id !== userId
   )
-    return 33;
+    return "auto auto auto 38px";
   else if (
     (i < messages.length - 1 &&
       messages[i + 1].sender._id !== m.sender._id &&
       messages[i].sender._id !== userId) ||
     (i === messages.length - 1 && messages[i].sender._id !== userId)
   )
-    return 0;
-  else return "auto";
+    return "auto auto auto 0px";
+  else return "auto 10px auto auto";
 };
 
 // Xu lis tin nhan (2 fucntion) : mess cúi cùng, mess cùng 1 người -> ava xuống bét
@@ -40,16 +40,19 @@ export const isSameUser = (messages, m, i) => {
 
 // Message Private - Message nhom
 export const getSender = (loggedUser, users) => {
-  if (!users && !loggedUser) {
-    // sua nghe
-    if (users[0]._id === loggedUser._id) {
-      return users[1].name;
-    } else {
-      return users[0].name;
-    }
-  }
+  return users[0]._id === loggedUser._id ? users[1].name : users[0].name;
 };
 
 export const getSenderFull = (loggedUser, users) => {
   return users[0]._id === loggedUser._id ? users[1] : users[0];
+};
+
+export const showMenu = (m, i, userId) => {
+  // console.log(i === messages.length - 1);
+  return i > 0 && m.sender._id === userId;
+};
+
+// Message Private - Message nhom
+export const getSenderPic = (loggedUser, users) => {
+  return users[0]._id == loggedUser._id ? users[1].pic : users[0].pic;
 };

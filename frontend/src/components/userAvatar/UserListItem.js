@@ -1,6 +1,6 @@
 import { Avatar } from "@chakra-ui/avatar";
 import { Box, Text } from "@chakra-ui/layout";
-import { ChatState } from "../../Context/ChatProvider";
+// import { ChatState } from "../../Context/ChatProvider";
 
 const UserListItem = ({ user, handleFunction }) => {
   return (
@@ -30,10 +30,10 @@ const UserListItem = ({ user, handleFunction }) => {
       />
       <Box>
         <Text>{user.name}</Text>
-        <Text fontSize="xs">
+        {/* <Text fontSize="xs">
           <b>Email : </b>
           {user.email}
-        </Text>
+        </Text> */}
       </Box>
     </Box>
   );

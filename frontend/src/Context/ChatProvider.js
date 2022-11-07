@@ -1,36 +1,45 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+// import {useState} from "react-usestateref"
 import { useHistory } from "react-router-dom";
 
-const ChatContext = createContext();
+export const ChatContext = createContext({});
 // contextAPI: qly state of our app -> fetch state directly from 1 place
 // truy cập accessAPI mọi nơi
 const ChatProvider = ({ children }) => {
   const [selectedChat, setSelectedChat] = useState();
-  const [user, setUser] = useState();
+
+  const [user, setuser] = useState(
+    JSON.parse(localStorage.getItem("userInfo"))
+  );
   const [notification, setNotification] = useState([]);
   const [chats, setChats] = useState([]);
-
+  const [socket, setsocket] = useState();
+  const [input, setInput] = useState([]);
   const history = useHistory();
 
+
   useEffect(() => {
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    setUser(userInfo);
-    if (!userInfo) {
+    if (user) {
+      history.push("/chats");
+    } else {
       history.push("/");
     }
   }, [history]);
-
   return (
     <ChatContext.Provider
       value={{
         user,
-        setUser,
+        setuser,
         selectedChat,
         setSelectedChat,
         notification,
         setNotification,
         chats,
         setChats,
+        socket,
+        setsocket,
+        input,
+        setInput,
       }}
     >
       {children}
