@@ -10,22 +10,16 @@ import { Button } from "@chakra-ui/react";
 import { ChatState } from "../Context/ChatProvider";
 import { useHistory } from "react-router-dom";
 import { Avatar } from "@chakra-ui/avatar";
-import io from "socket.io-client";
-const ENDPOINT = "http://localhost:5000";
-const MyChats = ({ fetchAgain }) => {
+
+const MyChats = ({ fetchAgain, socket }) => {
   const [loggedUser, setLoggedUser] = useState(
     JSON.parse(localStorage.getItem("userInfo"))
   );
 
-  const {
-    user,
-    setuser,
-    selectedChat,
-    setSelectedChat,
-    chats,
-    setChats,
-    socket,
-  } = ChatState();
+  const { user, setuser, selectedChat, setSelectedChat, chats, setChats } =
+    ChatState();
+
+  const [chat1, setchat1] = useState([]);
 
   const toast = useToast();
 
@@ -40,24 +34,7 @@ const MyChats = ({ fetchAgain }) => {
       minute: "2-digit",
     });
   };
-  const xuLyChats = (chats, newMessageRecieved) => {
-    chats.forEach((chat) => {
-      if (chat._id === newMessageRecieved._id)
-        chat.latestMessage = newMessageRecieved;
-    });
-  };
-  useEffect(() => {
-    // socket.on("message recieved", (newMessageRecieved) => {
-    //   xuLyChats(chats, newMessageRecieved);
-    // });
-    // console.log("SOCKET MYCHAT: ", socket);
-    // socket.on("message recieved", (newMessageRecieved) => {
-    //   console.log("MY CHAT SOCKET");
-    // });
-    console.log("MY CHAT: ", socket);
-    // socket = io(ENDPOINT);
-    // socket.emit("myChat", "TUI LA MY CHAT SOCKET");
-  });
+ 
 
   useEffect(() => {
     setuser(loggedUser);
@@ -89,6 +66,37 @@ const MyChats = ({ fetchAgain }) => {
       });
     }
   };
+
+  const xuLyChats = (chatsX, newMessageRecieved) => {
+    console.log("TRUNG NE XXXXX ");
+    chatsX.forEach((chat) => {
+      if (chat._id == newMessageRecieved.chat._id) {
+        console.log("TRUNG NE");
+        // chat.users.forEach((user1) => {
+          // if (user1._id == newMessageRecieved.sender._id) {
+            chat.latestMessage = newMessageRecieved;
+            setchat1(newMessageRecieved);
+          // }
+        // });
+      }
+    });
+    
+  };
+  useEffect(() => {
+    if (selectedChat) {
+      console.log("MY CHAT: ", socket);
+      socket.on("message recieved", (newMessageRecieved) => {
+        console.log("on: ", socket);
+        xuLyChats(chats, newMessageRecieved);
+        setChats(prevState => prevState = chats);
+    
+    console.log("ham: ", chats);
+      });
+    } else {
+      setSelectedChat(chats[chats.length - 1]);
+    }
+  }, [selectedChat || chats || chat1]);
+
   return (
     <>
       <Box

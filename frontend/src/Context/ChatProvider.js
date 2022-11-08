@@ -8,7 +8,7 @@ export const ChatContext = createContext({});
 // contextAPI: qly state of our app -> fetch state directly from 1 place
 // truy cập accessAPI mọi nơi
 const ChatProvider = ({ children }) => {
-  const [selectedChat, setSelectedChat] = useState();
+  const [selectedChat, setSelectedChat] = useState(null);
 
   const [user, setuser] = useState(
     JSON.parse(localStorage.getItem("userInfo"))

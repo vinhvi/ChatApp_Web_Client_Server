@@ -63,7 +63,7 @@ function SideDrawer() {
     setInput,
   } = ChatState();
   useEffect(() => {
-    console.log("MY CHAT: ", input);
+    // console.log("MY CHAT: ", input);
   }, [input]);
   const user = JSON.parse(localStorage.getItem("userInfo"));
   const history = useHistory();
@@ -181,7 +181,7 @@ function SideDrawer() {
         d="flex"
         justifyContent="space-between"
         alignItems="center"
-        bg="#05BC05"
+        bg="#117A65"
         w="100%"
         p="5px 10px 5px 10px"
       >
@@ -262,7 +262,14 @@ function SideDrawer() {
                 src={user.pic}
               />
             </MenuButton>
-            <MenuList>
+            <MenuList
+              style={{
+                right: -10,
+                top:-5,
+                zIndex: 1,
+                position: "absolute",
+              }}
+            >
               <ProfileModal user={user}>
                 <MenuItem>My Profile</MenuItem>{" "}
               </ProfileModal>

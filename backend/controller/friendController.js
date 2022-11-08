@@ -3,6 +3,20 @@ const Friend = require("../models/friendModel");
 const User = require("../models/userModel");
 const checkTonTai = asyncHandler(async (req, res) => {
   try {
+    var check = await Friend.find({status: 2}).find({
+      $or: [
+        { $and: [{ user: req.body.user }, { friend: req.body.friend }] },
+        { $and: [{ friend: req.body.user }, { user: req.body.friend }] },
+      ],
+    });
+    res.json(check);
+  } catch (error) {
+    res.status(400);
+    throw new Error(error.message);
+  }
+});
+const getStatusFriend = asyncHandler(async (req, res) => {
+  try {
     var check = await Friend.find({
       $or: [
         { $and: [{ user: req.body.user }, { friend: req.body.friend }] },
@@ -104,9 +118,16 @@ const getListFriend = asyncHandler(async (req, res) => {
   } else {
     try {
       var listFriend = [];
-      const getListFriend = await Friend.find({ status: 2 }).select(
-        "user friend -_id"
-      );
+      const getListFriend = await Friend.find({
+        $or: [
+          {
+            user: userId,
+          },
+          { friend: userId },
+        ],
+      })
+        .find({ status: 2 })
+        .select("user friend -_id");
       getListFriend.forEach((friend) => {
         if (!friend.user._id.toString().includes(userId))
           listFriend.push(friend.user._id.toString());
@@ -120,7 +141,8 @@ const getListFriend = asyncHandler(async (req, res) => {
       });
       setTimeout(() => {
         res.json(kq);
-      }, 3000);
+        console.log("KQ:", kq);
+      }, 1000);
     } catch (error) {
       res.status(400);
       throw new Error(error.message);
@@ -133,4 +155,5 @@ module.exports = {
   makeFriend,
   getListFriend,
   checkTonTai,
+  getStatusFriend
 };

@@ -147,59 +147,61 @@ const BoxMessage = ({ messages, m, i, socket }) => {
                 <>
                   <Box
                     display="flex"
-                    bg="red"
-                    right="230px"
-                    // width="10%"
+                    // bg="red"
+                    // right="230px"
+                    width="100%"
                     justifyContent={"space-between"}
                   >
-                    <Menu>
-                      <MenuButton
-                        as={IconButton}
-                        fontSize="15px"
-                        size="xs"
-                        style={{
-                          backgroundColor: "white",
-                          position: "relative",
-                          mr: "0px",
-                          display: `${isShown}`,
-                          // zIndex: "1",
-                        }}
-                        icon={<DragHandleIcon />}
-                        onClick={() => setIsShown("flex")}
-                      />
-                      <MenuList
-                        mt="-20px"
-                        // position={"fixed"}
-                        // zIndex={2}
-                        style={{
-                          // margin: showMenu(messages, m, i, user._id),
-                          right: showMenu(m, i, user._id) ? 0 : -400,
-                          zIndex: "2",
-                          d: "flex",
-                          position: "absolute",
-                          // top: "200px",
-                        }}
-                      >
-                        <MenuItem color="red" onClick={handleMessageClick}>
-                          <RepeatIcon colorScheme="red" mr="10px" />
-                          Recall Message
-                        </MenuItem>
-                        <MenuDivider />
-                      </MenuList>
-                    </Menu>
-                  </Box>
-                  <Box
-                    style={{
-                      margin: isSameSenderMargin(messages, m, i, user._id),
-                      marginTop: isSameUser(messages, m, i, user._id) ? 3 : 10,
-                      minWidth: "0px",
-                      maxWidth: "500px",
-                      zIndex: "2",
-                      position: "relative",
-                    }}
-                    ref={ref}
-                  >
-                    <Image borderRadius={5} src={handlePic(m.pic)} />
+                    <Box
+                      style={{
+                        margin: isSameSenderMargin(messages, m, i, user._id),
+                        marginTop: isSameUser(messages, m, i, user._id)
+                          ? 3
+                          : 10,
+                        minWidth: "0px",
+                        maxWidth: "500px",
+                        zIndex: "1",
+                        background: "blue",
+                        // width: "50%",
+                        position: "relative",
+                      }}
+                      ref={ref}
+                    >
+                      <Image borderRadius={5} src={handlePic(m.pic)} />
+                      <Menu>
+                        <MenuButton
+                          as={IconButton}
+                          fontSize="15px"
+                          size="xs"
+                          style={{
+                            zIndex: "162",
+                            backgroundColor: "white",
+                            position: "absolute",
+                            // mr: "100px",
+                            bottom:200,
+                            right: showMenu(m, i, user._id) ? 500 : -30,
+                            display: `${isShown}`,
+                          }}
+                          icon={<DragHandleIcon />}
+                          onClick={() => setIsShown("flex")}
+                        />
+                        <MenuList
+                          mt="-20px"
+                          style={{
+                            right: showMenu(m, i, user._id) ? 0 : -240,
+                            zIndex: "2",
+                            d: "flex",
+                            position: "absolute",
+                          }}
+                        >
+                          <MenuItem color="red" onClick={handleMessageClick}>
+                            <RepeatIcon colorScheme="red" mr="10px" />
+                            Recall Message
+                          </MenuItem>
+                          <MenuDivider />
+                        </MenuList>
+                      </Menu>
+                    </Box>
                   </Box>
                 </>
               ) : (

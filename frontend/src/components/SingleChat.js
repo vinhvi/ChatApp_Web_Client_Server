@@ -1,6 +1,12 @@
 import { Box, Text } from "@chakra-ui/layout";
 import "./styles.css";
-import { IconButton, Spinner, useToast, Image } from "@chakra-ui/react";
+import {
+  IconButton,
+  Spinner,
+  useToast,
+  Image,
+  Divider,
+} from "@chakra-ui/react";
 import { getSender, getSenderFull } from "../config/ChatLogics";
 import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
@@ -10,6 +16,7 @@ import { ArrowBackIcon, InfoOutlineIcon, PhoneIcon } from "@chakra-ui/icons";
 import ScrollableChat from "./ScrollableChat";
 import animationData from "../animations/typing.json";
 import Lottie from "react-lottie";
+import { BsPersonPlus, BsPersonCheck } from "react-icons/bs";
 
 import {
   Drawer,
@@ -24,7 +31,6 @@ import BoxInfoFile from "./miscellaneous/BoxInfoFile";
 import { ChatState } from "../Context/ChatProvider";
 ///////SOCKET///////
 import BoxInfoIamge from "./miscellaneous/BoxInforImage";
-import io from "socket.io-client";
 import InputComponent from "./ChatComponent/InputComponent";
 
 const ENDPOINT = "http://localhost:5000"; // socket den
@@ -36,7 +42,7 @@ const openNewWindow = () => {
   window.open("http://localhost:3002", "tri", params);
 };
 
-const SingleChat = ({ fetchAgain, setFetchAgain }) => {
+const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
   const defaultOptions = {
     loop: true,
     autoplay: true,
@@ -48,13 +54,15 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false); // load, xoay vong vong
-  const [socketConnected, setSocketConnected] = useState(false);
+  // const [socketConnected, setSocketConnected] = useState(false);
 
   const [pic, setPic] = useState();
   const [istyping, setIsTyping] = useState(false);
   const toast = useToast();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [showMakeFriend, setshowMakeFriend] = useState(false);
+  const [showAcceptFriend, setshowAcceptFriend] = useState(false);
 
   const history = useHistory();
 
@@ -66,6 +74,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     notification,
     setNotification,
     setSocket,
+    chats,
+    setChats,
   } = ChatState();
   const user1 = JSON.parse(localStorage.getItem("userInfo"));
 
@@ -101,32 +111,71 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }
   };
 
+  const checkFriend = async (selectedChat) => {
+    if (!selectedChat) return;
+    if (selectedChat.isGroupChat) return;
+    try {
+      const config = {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      // const { data } = await axios.post(`/api/chat`, { userId }, config);
+      const { data } = await axios.post(
+        `/api/friend/checkFriend`,
+        {
+          user: selectedChat.users[0],
+          friend: selectedChat.users[1],
+        },
+        config
+      );
+      if (data.length > 0) {
+        console.log("da la ban");
+        setshowMakeFriend(false);
+      } else {
+        console.log("chua la ban");
+        setshowMakeFriend(true);
+      }
+    } catch (error) {
+      toast({
+        title: "Error fetching the chat",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
+  };
+
   ///////////SOCKET////////////////////
   useEffect(() => {
-    if (!socket) {
-      socket = io(ENDPOINT);
-      socket.emit("setup", user);
-      socket.on("connected", () => setSocketConnected(true)); // client nhận được rồi mơi save dô client
+    if (selectedChat) {
       socket.on("typing", () => setIsTyping(true));
       socket.on("stop typing", () => setIsTyping(false));
-      console.log("SINGLE CHAT:", socket);
+    } else {
+      setSelectedChat(chats[chats.length - 1]);
     }
-    setSocket(socket);
   }, []);
 
   useEffect(() => {
-    socket.on("recalled mess", (mess) => {
-      if (
-        !selectedChatCompare || // if chat is not selected or doesn't match current chat
-        selectedChatCompare._id !== mess.chat._id
-      ) {
-        // console.log("IFFF");
-      } else {
-        console.log("SINGLE CHAT: ", mess);
-        xuLyRecall(messages, mess);
-        setMessages(messages);
-      }
-    });
+    if (selectedChat) {
+      socket.on("recalled mess", (mess) => {
+        if (
+          !selectedChatCompare || // if chat is not selected or doesn't match current chat
+          selectedChatCompare._id !== mess.chat._id
+        ) {
+          // console.log("IFFF");
+        } else {
+          console.log("SINGLE CHAT: ", mess);
+          xuLyRecall(messages, mess);
+          setMessages(messages);
+        }
+      });
+    } else {
+      setSelectedChat(chats[chats.length - 1]);
+    }
   }, [messages]);
 
   const xuLyRecall = (messages, data) => {
@@ -144,30 +193,38 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }
     // tương tự như AJAX: fetchMessages -> thêm message vào
     fetchMessages();
+    checkFriend(selectedChat);
     selectedChatCompare = selectedChat;
     // eslint-disable-next-line
   }, [selectedChat]);
 
   useEffect(() => {
-    socket.on("message recieved", (newMessageRecieved) => {
-      console.log("select com ", selectedChatCompare);
-      if (
-        !selectedChatCompare || // if chat is not selected or doesn't match current chat
-        selectedChatCompare._id !== newMessageRecieved.chat._id ||
-        selectedChatCompare == undefined
-      ) {
-        if (!notification.includes(newMessageRecieved)) {
-          // set notification
-          setNotification([...notification, newMessageRecieved]);
-          console.log("thong bap", notification);
-          setFetchAgain(!fetchAgain);
+    if (selectedChat) {
+      socket.on("message recieved", (newMessageRecieved) => {
+        if (
+          !selectedChatCompare || // if chat is not selected or doesn't match current chat
+          selectedChatCompare._id !== newMessageRecieved.chat._id ||
+          selectedChatCompare == undefined
+        ) {
+          if (!notification.includes(newMessageRecieved)) {
+            // set notification
+            setNotification([...notification, newMessageRecieved]);
+            console.log("thong bap", notification);
+            setFetchAgain(!fetchAgain);
+          }
+        } else {
+          setMessages([...messages, newMessageRecieved]);
+          selectedChat.latestMessage = newMessageRecieved;
         }
-      } else {
-        setMessages([...messages, newMessageRecieved]);
-        console.log("dua cai tin nhan ra day coi choa: ", messages);
-      }
-    });
+      });
+    } else {
+      setSelectedChat(chats[chats.length - 1]);
+    }
   }, [messages]);
+
+  const handleMakeFriend = () => {
+    console.log("click");
+  };
 
   return (
     <>
@@ -214,14 +271,12 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
               />
             </Box>
           </Box>
+
           <Box
             display="flex"
             flexDir="column"
             justifyContent="flex-end"
-            p={3}
             className="singleChat"
-            // backgroundImage="linear-gradient(180deg, #AED6F1, white)"
-            // bg="gray"
             width="100%"
             h="100%"
             borderRadius="lg"
@@ -239,7 +294,36 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
               />
             ) : (
               <Box className="messages">
-                <ScrollableChat messages={messages} socket={socket} />
+                {showMakeFriend && (
+                  <Box
+                    style={{
+                      
+                      position: "absolute",
+                      top: 133,
+                      right: 22,
+                      height: "31px",
+                      width: "1123px",
+                      alignContent: "center",
+                    }}
+                  >
+                    <Text
+                      display="flex"
+                      background="#16A085"
+                      w="100%"
+                      fontSize="20px"
+                      color="white"
+                      justifyContent={"center"}
+                      onClick={handleMakeFriend}
+                    >
+                      <BsPersonPlus />
+                      Add Friend
+                    </Text>
+                  </Box>
+                )}
+                <ScrollableChat
+                  messages={messages}
+                  socket={socket}
+                ></ScrollableChat>
               </Box>
             )}
             {istyping ? (
