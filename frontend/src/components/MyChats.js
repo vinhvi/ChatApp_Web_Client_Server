@@ -83,7 +83,7 @@ const MyChats = ({ fetchAgain, socket }) => {
     
   };
   useEffect(() => {
-    if (selectedChat) {
+    if (socket) {
       console.log("MY CHAT: ", socket);
       socket.on("message recieved", (newMessageRecieved) => {
         console.log("on: ", socket);

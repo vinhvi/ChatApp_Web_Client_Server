@@ -143,6 +143,69 @@ const BoxMessage = ({ messages, m, i, socket }) => {
                 setmess(null);
               }}
             >
+              {m.content === "file" && (
+                <>
+                  <Box
+                    display="flex"
+                    // bg="red"
+                    // right="230px"
+                    width="100%"
+                    justifyContent={"space-between"}
+                  >
+                    <Box
+                      style={{
+                        margin: isSameSenderMargin(messages, m, i, user._id),
+                        marginTop: isSameUser(messages, m, i, user._id)
+                          ? 3
+                          : 10,
+                        minWidth: "0px",
+                        maxWidth: "500px",
+                        zIndex: "1",
+                        background: "blue",
+                        // width: "50%",
+                        position: "relative",
+                      }}
+                      ref={ref}
+                    >
+                     
+                      <Image borderRadius={5} src={handlePic(m.file)} />
+                      <Menu>
+                        <MenuButton
+                          as={IconButton}
+                          fontSize="15px"
+                          size="xs"
+                          style={{
+                            zIndex: "162",
+                            backgroundColor: "white",
+                            position: "absolute",
+                            // mr: "100px",
+                            bottom: 200,
+                            right: showMenu(m, i, user._id) ? 500 : -30,
+                            display: `${isShown}`,
+                          }}
+                          icon={<DragHandleIcon />}
+                          onClick={() => setIsShown("flex")}
+                        />
+                        <MenuList
+                          mt="-20px"
+                          style={{
+                            right: showMenu(m, i, user._id) ? 0 : -240,
+                            zIndex: "2",
+                            d: "flex",
+                            position: "absolute",
+                          }}
+                        >
+                          <MenuItem color="red" onClick={handleMessageClick}>
+                            <RepeatIcon colorScheme="red" mr="10px" />
+                            Recall Message
+                          </MenuItem>
+                          <MenuDivider />
+                        </MenuList>
+                      </Menu>
+                    </Box>
+                  </Box>
+                </>
+              )}
               {m.content === "image" ? (
                 <>
                   <Box
@@ -178,7 +241,7 @@ const BoxMessage = ({ messages, m, i, socket }) => {
                             backgroundColor: "white",
                             position: "absolute",
                             // mr: "100px",
-                            bottom:200,
+                            bottom: 200,
                             right: showMenu(m, i, user._id) ? 500 : -30,
                             display: `${isShown}`,
                           }}

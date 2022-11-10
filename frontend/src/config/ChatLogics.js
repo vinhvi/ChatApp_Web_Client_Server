@@ -56,3 +56,7 @@ export const showMenu = (m, i, userId) => {
 export const getSenderPic = (loggedUser, users) => {
   return users[0]._id === loggedUser._id ? users[1].pic : users[0].pic;
 };
+
+export const getUserOther = (loggedUser, users) => {
+  return users[0]._id === loggedUser._id ? users[1] : users[0];
+};

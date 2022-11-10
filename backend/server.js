@@ -58,7 +58,6 @@ io.on("connection", (socket) => {
     console.log("STOP TYPING: ", room);
     socket.in(room).emit("stop typing");
   });
-
   socket.on("new message", (newMessageRecieved) => {
     var chat = newMessageRecieved.chat;
     if (!chat.users) return console.log("chat.user is not defined");
@@ -88,4 +87,34 @@ io.on("connection", (socket) => {
       socket.leave(userData._id);
     });
   });
+  //callXXX
+  socket.on("callXXX", (selectedChat) => {
+    console.log("SERVER nhan dc ui nghe : ");
+    console.log(selectedChat);
+    
+    if(!selectedChat) return console.log("chat.user is not defined");
+    selectedChat.users.forEach((user) => {
+      // if (user._id == selectedChat.user._id) return;
+      socket.in(user._id).emit("callYYY", selectedChat); // go inside user 's room
+    });
+    // socket.emit("callYYY", selectedChat);
+  })
+  // PHONE CALL
+  socket.emit("me", socket.id);
+  console.log("CALL id: ", socket.id);
+  socket.on("disconnect", () => {
+    socket.broadcast.emit("callEnded");
+  });
+  socket.on("callUser", (data) => {
+    io.to(data.userToCall).emit("callUser", {
+      signal: data.signalData,
+      from: data.from,
+      name: data.name,
+    });
+  });
+
+  socket.on("answerCall", (data) => {
+    io.to(data.to).emit("callAccepted", data.signal);
+  });
+
 });

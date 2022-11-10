@@ -11,6 +11,7 @@ import { useState } from "react";
 import { Box } from "@chakra-ui/layout";
 import { IconButton, Grid, GridItem, useToast } from "@chakra-ui/react";
 import EmojiPicker from "emoji-picker-react";
+import {IoImageOutline} from "react-icons/io5"
 import "../styles.css";
 import { ChatState } from "../../Context/ChatProvider";
 
@@ -21,7 +22,7 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
   const [typing, setTyping] = useState(false);
   const toast = useToast();
   const [loading, setLoading] = useState(false); // load, xoay vong vong
-  const [pic, setPic] = useState();
+  // const [pic, setPic] = useState();
   const { input, setInput } = ChatState();
   const handleEmojiClick = (event) => {
     let sym = event.unified.split("-");
@@ -32,13 +33,33 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
     message += emoji;
     setNewMessage(message);
   };
+ //Goi input upload hien ra de chon image
+ const uploadImagine = () => {
+  const e3 = document.getElementById("imagine");
+  // const e4 = refImage.current;
+  e3.click();
+};
+//Goi input upload hien ra de chon file
+const deleteImageInInput = () => {
+  const e3 = document.getElementById("imagine");
+  
+  e3.value = "";
 
-  //Goi input upload hien ra de chon file
-  const uploadFile = () => {
-    const e3 = document.getElementById("file");
-    // const e4 = refImage.current;
-    e3.click();
-  };
+};
+
+//Goi input upload hien ra de chon file
+const deleteFileInInput = () => {
+  const e3 = document.getElementById("file");
+  // const e4 = refImage.current;
+  e3.value = "";
+
+};
+//Goi input upload hien ra de chon image
+const uploadFile = () => {
+  const e3 = document.getElementById("file");
+  // const e4 = refImage.current;
+  e3.click();
+};
   // Ham gui tin nhan
   const sendMessage = async (event) => {
     // // param: sự kiện
@@ -113,7 +134,8 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
     }
     // console.log(pics);
     if (pics.type === "image/jpeg" || pics.type === "image/png") {
-      const data = new FormData();
+      // setTimeout(() => {
+        const data = new FormData();
       data.append("file", pics);
       data.append("upload_preset", "MongoChat04");
       data.append("cloud_name", "dfgkg5eej");
@@ -123,15 +145,21 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          setPic(data.url.toString());
+          // setPic(data.url.toString());
           console.log(data.url.toString());
+          submitHandler(data.url.toString());
+          console.log("DO DO DO ");
           setLoading(false);
         })
         .catch((err) => {
           console.log(err);
           setLoading(false);
         });
-    } else {
+      // }, 4000);
+      console.log("CHAY CHAY NHE!!!");
+      // submitHandler();
+    } 
+    else {
       toast({
         title: "Please Select an Image!",
         status: "warning",
@@ -143,7 +171,7 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
       return;
     }
   };
-  const submitHandler = async () => {
+  const submitHandler = async (pic1) => {
     try {
       const config = {
         headers: {
@@ -152,18 +180,55 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
         },
       };
       setNewMessage(""); // xóa đi thông tin trong input
-      console.log("pic nè bạn ơii@@@@@@: ", pic);
+      console.log("pic nè bạn ơii@@@@@@: ", pic1);
       const { data } = await axios.post(
         "/api/message",
         {
           content: " image",
           chatId: selectedChat,
-          pic: pic,
+          pic: pic1,
         },
         config
       );
       // console.log(data);
       socket.emit("new message", data);
+      deleteImageInInput();
+
+    } catch (error) {
+      toast({
+        // Toast : 1. toast = useToast -> 2. xài
+        title: "Error Occured!",
+        description: "Failed to send the Message",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+    }
+  };
+  const submitHandlerFile = async (file1) => {
+    try {
+      const config = {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      setNewMessage(""); // xóa đi thông tin trong input
+      console.log("pic nè bạn ơii@@@@@@: ", file1);
+      const { data } = await axios.post(
+        "/api/message",
+        {
+          content: " file",
+          chatId: selectedChat,
+          file: file1,
+        },
+        config
+      );
+      // console.log(data);
+      socket.emit("new message", data);
+      deleteFileInInput();
+
     } catch (error) {
       toast({
         // Toast : 1. toast = useToast -> 2. xài
@@ -177,25 +242,58 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
     }
   };
 
-  //khi nhan nut backspace
-  const handleBackspace = async (event) => {
-    // const coutn = newMessage.length;
-
-    if (event.key === "Backspace") {
-      //   console.log(newMessage.length);
-      //   console.log("aa");
-      let lastTypingTime = new Date().getTime();
-      var timerLength = 1000;
-      setTimeout(() => {
-        var timeNow = new Date().getTime();
-        var timeDiff = timeNow - lastTypingTime;
-        if (timeDiff >= timerLength && typing) {
-          socket.emit("stop typing", selectedChat._id);
-          setTyping(false);
-        }
-      }, timerLength);
-    }
-  };
+ //Hàm xử lý file
+ const postFile = (file1) => {
+  setLoading(true);
+  if (file1 === undefined) {
+    toast({
+      title: "Please Select an File!",
+      status: "warning",
+      duration: 5000,
+      isClosable: true,
+      position: "bottom",
+    });
+    return;
+  }
+  // console.log(pics);
+  if (file1) {
+    // setTimeout(() => {
+    const data = new FormData();
+    data.append("file", file1);
+    data.append("upload_preset", "MongoChat04");
+    data.append("cloud_name", "dfgkg5eej");
+    fetch("https://api.cloudinary.com/v1_1/dfgkg5eej/image/upload", {
+      method: "post",
+      body: data,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        // setPic(data.url.toString());
+        console.log(data);
+        // submitHandlerFile(data.url.toString());
+        console.log("DO DO DO ");
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+    // }, 4000);
+    console.log("CHAY CHAY NHE!!!");
+    // submitHandler();
+  } 
+  else {
+    toast({
+      title: "Please Select an File!",
+      status: "warning",
+      duration: 5000,
+      isClosable: true,
+      position: "bottom",
+    });
+    setLoading(false);
+    return;
+  }
+};
 
   const handleEmojiPickerhideShow = () => {
     setShowEmojiPicker(!showEmojiPicker);
@@ -233,15 +331,15 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
               colorScheme="teal"
               size="md"
               fontSize="20px"
-              icon={<BsPaperclip />}
-              onClick={uploadFile}
+              icon={<IoImageOutline />}
+              onClick={uploadImagine}
             />
 
             {/* <img src={Attach} alt=""  /> */}
             <input
               type="file"
               style={{ display: "none" }}
-              id="file"
+              id="imagine"
               accept="image/*"
               onChange={(e) => postDetails(e.target.files[0])}
             />
@@ -253,7 +351,17 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
               variant="outline"
               colorScheme="teal"
               fontSize="20px"
-              icon={<BsMicFill />}
+              icon={<BsPaperclip />}
+              onClick={uploadFile}
+            />
+
+            {/* <img src={Attach} alt=""  /> */}
+            <input
+              type="file"
+              style={{ display: "none" }}
+              id="file"
+              accept="file_extension"
+              onChange={(e) => postFile(e.target.files[0])}
             />
           </Box>
         </GridItem>

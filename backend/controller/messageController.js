@@ -3,7 +3,7 @@ const Chat = require("../models/chatModel");
 const Message = require("../models/messageModel");
 const User = require("../models/userModel");
 const sendMessage = asyncHandler(async (req, res, next) => {
-  const { content, chatId, pic } = req.body;
+  const { content, chatId, pic, file } = req.body;
   if (!content || !chatId) {
     console.log("Ko co content , chatId");
     return res.sendStatus(400);
@@ -13,6 +13,7 @@ const sendMessage = asyncHandler(async (req, res, next) => {
     content: content,
     chat: chatId,
     pic: pic,
+    file: file
   };
   try {
     var message = await Message.create(newMessage);

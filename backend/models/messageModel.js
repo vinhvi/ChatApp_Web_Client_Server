@@ -11,9 +11,9 @@ const messageModel = mongoose.Schema(
     pic: {
       type: String,
     },
-    // file: {
-    //   type: String,
-    // },
+    file: {
+      type: String,
+    },
   },
   {
     timestamps: true,

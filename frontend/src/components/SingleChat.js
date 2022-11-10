@@ -7,7 +7,7 @@ import {
   Image,
   Divider,
 } from "@chakra-ui/react";
-import { getSender, getSenderFull } from "../config/ChatLogics";
+import { getSender, getUserOther } from "../config/ChatLogics";
 import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useDisclosure } from "@chakra-ui/hooks";
@@ -36,11 +36,6 @@ import InputComponent from "./ChatComponent/InputComponent";
 const ENDPOINT = "http://localhost:5000"; // socket den
 var socket, selectedChatCompare;
 //////SOCKET//////
-const openNewWindow = () => {
-  // console.log("hello ko ra");
-  const params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=300,height=300`;
-  window.open("http://localhost:3002", "tri", params);
-};
 
 const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
   const defaultOptions = {
@@ -64,6 +59,9 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
   const [showMakeFriend, setshowMakeFriend] = useState(false);
   const [showAcceptFriend, setshowAcceptFriend] = useState(false);
 
+  const [contentSendRequest, setcontentSendRequest] = useState("");
+  const [disable, setdisable] = useState(false);
+
   const history = useHistory();
 
   const {
@@ -78,6 +76,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
     setChats,
   } = ChatState();
   const user1 = JSON.parse(localStorage.getItem("userInfo"));
+
+ 
 
   const fetchMessages = async () => {
     if (!selectedChat) return;
@@ -111,7 +111,104 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
     }
   };
 
-  const checkFriend = async (selectedChat) => {
+  //Kiem tra xem la no da gui loi moi ket ban chua
+  const checkStatusFriend = async (selectedChat) => {
+    if (!selectedChat) return;
+    if (selectedChat.isGroupChat) {
+      setshowAcceptFriend(false);
+          setshowMakeFriend(false);
+      return;
+    }
+    try {
+      const config = {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      // const { data } = await axios.post(`/api/chat`, { userId }, config);
+
+      const { data } = await axios.post(
+        `/api/friend/getStatusFriend`,
+        {
+          user: selectedChat.users[0],
+          friend: selectedChat.users[1],
+        },
+        config
+      );
+      if (data.length > 0) {
+        if (data[0].status == 1) {
+          console.log("da gui loi moi: ", data);
+          setshowMakeFriend(false);
+          setshowAcceptFriend(true);
+          if (data[0].user == user._id) {
+            setcontentSendRequest("Request Sended");
+            setdisable(true);
+          } else {
+            setcontentSendRequest("Accept");
+            setdisable(false);
+          }
+        } else {
+          console.log("da la banj roi", data);
+          setshowAcceptFriend(false);
+          setshowMakeFriend(false);
+        }
+      } else {
+        console.log("chua gui gi ca");
+        setshowMakeFriend(true);
+        setshowAcceptFriend(false);
+      }
+    } catch (error) {
+      toast({
+        title: "Error fetching the chat",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
+  };
+
+  // gui loi moi ket ban ne
+  const addFriend = async (selectedChat) => {
+    if (!selectedChat) return;
+    // if (selectedChat.isGroupChat) return;
+    try {
+      const config = {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      // const { data } = await axios.post(`/api/chat`, { userId }, config);
+
+      const { data } = await axios.post(
+        `/api/friend/sendRequest`,
+        {
+          user: user._id,
+          friend: getUserOther(user, selectedChat.users)._id,
+        },
+        config
+      );
+      if (data.status == 1) {
+        checkStatusFriend(selectedChat);
+      } else {
+        console.log("da ket ban nhe");
+      }
+    } catch (error) {
+      toast({
+        title: "Error fetching the chat",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
+  };
+
+  const makeFriend = async (selectedChat) => {
     if (!selectedChat) return;
     if (selectedChat.isGroupChat) return;
     try {
@@ -122,20 +219,18 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
         },
       };
       // const { data } = await axios.post(`/api/chat`, { userId }, config);
+
       const { data } = await axios.post(
-        `/api/friend/checkFriend`,
+        `/api/friend/makeFriend`,
         {
-          user: selectedChat.users[0],
-          friend: selectedChat.users[1],
+          user: user._id,
+          friend: getUserOther(user, selectedChat.users)._id,
         },
         config
       );
-      if (data.length > 0) {
-        console.log("da la ban");
-        setshowMakeFriend(false);
-      } else {
-        console.log("chua la ban");
-        setshowMakeFriend(true);
+      if (data) {
+        console.log("dua da ta day:", data);
+        checkStatusFriend(selectedChat);
       }
     } catch (error) {
       toast({
@@ -151,7 +246,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
 
   ///////////SOCKET////////////////////
   useEffect(() => {
-    if (selectedChat) {
+    if (socket) {
       socket.on("typing", () => setIsTyping(true));
       socket.on("stop typing", () => setIsTyping(false));
     } else {
@@ -193,7 +288,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
     }
     // tương tự như AJAX: fetchMessages -> thêm message vào
     fetchMessages();
-    checkFriend(selectedChat);
+    checkStatusFriend(selectedChat);
     selectedChatCompare = selectedChat;
     // eslint-disable-next-line
   }, [selectedChat]);
@@ -223,7 +318,31 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
   }, [messages]);
 
   const handleMakeFriend = () => {
-    console.log("click");
+    addFriend(selectedChat);
+    setshowMakeFriend(false);
+  };
+
+  const handleAcceptFriend = () => {
+    if (disable) {
+      console.log("ko dc bam ");
+    } else {
+      console.log("da chap nhan");
+      makeFriend(selectedChat);
+    }
+  };
+
+  const openNewWindow = () => {
+    // console.log("hello ko ra");
+    const params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=300,height=300`;
+    window.open(
+      "http://localhost:3002/?id=" + getUserOther(user, selectedChat.users)._id,
+      "tri",
+      params
+    );
+    if(socket){
+
+      socket.emit("callXXX", selectedChat);
+    }
   };
 
   return (
@@ -297,7 +416,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
                 {showMakeFriend && (
                   <Box
                     style={{
-                      
                       position: "absolute",
                       top: 133,
                       right: 22,
@@ -317,6 +435,33 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
                     >
                       <BsPersonPlus />
                       Add Friend
+                    </Text>
+                  </Box>
+                )}
+
+                {showAcceptFriend && (
+                  <Box
+                    style={{
+                      position: "absolute",
+                      top: 133,
+                      right: 22,
+                      height: "31px",
+                      width: "1123px",
+                      alignContent: "center",
+                    }}
+                  >
+                    <Text
+                      display="flex"
+                      background="#16A085"
+                      w="100%"
+                      fontSize="20px"
+                      color="white"
+                      justifyContent={"center"}
+                      onClick={handleAcceptFriend}
+                      isDis
+                    >
+                      <BsPersonPlus />
+                      {contentSendRequest}
                     </Text>
                   </Box>
                 )}

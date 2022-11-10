@@ -6,6 +6,24 @@ import SideDrawer from "../components/miscellaneous/SideDrawer";
 import { ChatState, ChatContext } from "../Context/ChatProvider";
 import { useHistory } from "react-router-dom";
 import io from "socket.io-client";
+import CallModal from "../components/Call/CallModal";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Button,
+  useDisclosure,
+  FormControl,
+  Input,
+  useToast,
+  IconButton,
+} from "@chakra-ui/react";
+import { getUserOther } from "../config/ChatLogics";
+// CallModal
 
 const ENDPOINT = "http://localhost:5000"; // socket den
 var socket;
@@ -15,6 +33,10 @@ const Chatpage = () => {
   const [fetchAgain, setFetchAgain] = useState(false);
   const history = useHistory();
   const [socketConnected, setSocketConnected] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
+  const [otherUser, setotherUser] = useState();
+  
 
   useEffect(() => {
     if (user == null) {
@@ -29,25 +51,55 @@ const Chatpage = () => {
     
     console.log("SINGLE CHAT:", socket);
   }, []);
+
+  useEffect(() => {
+    if(socket){
+      socket.on("callYYY", (selectedChat) => {
+        console.log("alo call");
+        if(user._id != getUserOther(user, selectedChat.users)._id){
+          setotherUser(getUserOther(user, selectedChat.users));
+          console.log("nguoi kia", otherUser);
+          onOpen();
+        }
+        
+      });
+    }
+    
+  });
+
+  
+
   return (
-    <div style={{ width: "100%" }}>
-      {user && <SideDrawer />}
-      <Box d="flex" justifyContent="space-between" w="100%" h="91.5vh" p="10px">
-        {user && 
-        <MyChats 
-        fetchAgain={fetchAgain} 
-        socket={socket}
-        />}
-        {user && (
-          <Chatbox 
-          fetchAgain={fetchAgain} 
-          setFetchAgain={setFetchAgain} 
-          socket={socket}
-          socketConnected ={socketConnected}
-          />
-        )}
-      </Box>
-    </div>
+    <>
+      <div style={{ width: "100%" }}>
+        {user && <SideDrawer />}
+        {/* <Button onClick={onOpen} >Hello</Button> */}
+        <Box
+          d="flex"
+          justifyContent="space-between"
+          w="100%"
+          h="91.5vh"
+          p="10px"
+        >
+          {user && <MyChats fetchAgain={fetchAgain} socket={socket} />}
+          {user && (
+            <Chatbox
+              fetchAgain={fetchAgain}
+              setFetchAgain={setFetchAgain}
+              socket={socket}
+              socketConnected={socketConnected}
+            />
+          )}
+        </Box>
+      </div>
+
+      <CallModal 
+      onOpen={onOpen} 
+      onClose={onClose} 
+      isOpen={isOpen} 
+      otherUser={otherUser}
+      socket={socket} />
+    </>
   );
 };
 
