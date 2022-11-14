@@ -28,7 +28,9 @@
     ![Screenshot 2022-11-14 111636](https://user-images.githubusercontent.com/78186410/201574911-17ad93cf-69a9-4126-acb7-6f43db3d9b5e.png)
     - Chat nhóm, Chat hình ảnh, file:
   ![image](https://user-images.githubusercontent.com/78186410/201575414-cd1fc30b-60ef-4475-b100-87c5dc3e702a.png)
+  ![image](https://user-images.githubusercontent.com/78186410/201576296-9558a9dd-a35e-4b41-a896-b56109295ef2.png)
     - Phân quyền: Chỉ có trưởng nhóm mới có quyền thêm thành viên vào nhóm hoặc xóa nhóm
+    ![image](https://user-images.githubusercontent.com/78186410/201576332-7b1c33b7-4eb5-4e38-8b7a-3945feec59b0.png)
     - Recall message:
     ![image](https://user-images.githubusercontent.com/78186410/201575657-c4b41844-5721-4934-b424-1abd18857f6b.png)
 4. Người tham gia:
