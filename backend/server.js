@@ -87,34 +87,35 @@ io.on("connection", (socket) => {
       socket.leave(userData._id);
     });
   });
-  //callXXX
+  // gọi nhau
   socket.on("callXXX", (selectedChat) => {
-    console.log("SERVER nhan dc ui nghe : ");
-    console.log(selectedChat);
-    
-    if(!selectedChat) return console.log("chat.user is not defined");
+    if (!selectedChat) return console.log("chat.user is not defined");
     selectedChat.users.forEach((user) => {
       // if (user._id == selectedChat.user._id) return;
       socket.in(user._id).emit("callYYY", selectedChat); // go inside user 's room
     });
-    // socket.emit("callYYY", selectedChat);
-  })
+  });
   // PHONE CALL
   socket.emit("me", socket.id);
-  console.log("CALL id: ", socket.id);
+  // console.log("CALL id: ", socket.id);
+
   socket.on("disconnect", () => {
     socket.broadcast.emit("callEnded");
   });
+  socket.on("taoMunGoiDT", (data) => {
+    console.log("CALL ME:");
+    socket.broadcast.emit("myPhoneNumberIs", socket.id); //
+  });
+
   socket.on("callUser", (data) => {
+    console.log("CALLUSER: ", data.userToCall);
     io.to(data.userToCall).emit("callUser", {
       signal: data.signalData,
       from: data.from,
-      name: data.name,
+      name: "Chi",
     });
   });
-
   socket.on("answerCall", (data) => {
     io.to(data.to).emit("callAccepted", data.signal);
   });
-
 });
