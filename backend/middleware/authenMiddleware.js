@@ -15,6 +15,7 @@ const project = asyncHandler(async (req, res, next) => {
       next();
     } catch (error) {
       res.status(401);
+      console.log("Not authorized, token failed 1");
       throw new Error("Not authorized, token failed 1");
     }
   }

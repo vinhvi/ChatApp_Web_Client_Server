@@ -12,7 +12,7 @@ const ScrollableChat = ({ messages, socket }) => {
 
         {messages &&
           messages.map((m, i) => (
-            <BoxMessage messages={messages} m={m} i={i} socket={socket} />
+            <BoxMessage key={i} messages={messages} m={m} i={i} socket={socket} />
           ))}
       </ScrollableFeed>
     </>

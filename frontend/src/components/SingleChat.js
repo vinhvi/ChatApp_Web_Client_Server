@@ -33,8 +33,8 @@ import { ChatState } from "../Context/ChatProvider";
 import BoxInfoIamge from "./miscellaneous/BoxInforImage";
 import InputComponent from "./ChatComponent/InputComponent";
 
-const ENDPOINT = "http://localhost:5000"; // socket den
-var socket, selectedChatCompare;
+const ENDPOINT = "http://172.16.10.54:5000"; // socket den
+var selectedChatCompare;
 //////SOCKET//////
 
 const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
@@ -77,8 +77,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
   } = ChatState();
   const user1 = JSON.parse(localStorage.getItem("userInfo"));
 
- 
-
   const fetchMessages = async () => {
     if (!selectedChat) return;
     try {
@@ -116,7 +114,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
     if (!selectedChat) return;
     if (selectedChat.isGroupChat) {
       setshowAcceptFriend(false);
-          setshowMakeFriend(false);
+      setshowMakeFriend(false);
       return;
     }
     try {
@@ -249,13 +247,11 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
     if (socket) {
       socket.on("typing", () => setIsTyping(true));
       socket.on("stop typing", () => setIsTyping(false));
-    } else {
-      setSelectedChat(chats[chats.length - 1]);
     }
   }, []);
 
   useEffect(() => {
-    if (selectedChat) {
+    if (socket) {
       socket.on("recalled mess", (mess) => {
         if (
           !selectedChatCompare || // if chat is not selected or doesn't match current chat
@@ -263,7 +259,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
         ) {
           // console.log("IFFF");
         } else {
-          console.log("SINGLE CHAT: ", mess);
           xuLyRecall(messages, mess);
           setMessages(messages);
         }
@@ -294,7 +289,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
   }, [selectedChat]);
 
   useEffect(() => {
-    if (selectedChat) {
+    if (socket) {
       socket.on("message recieved", (newMessageRecieved) => {
         if (
           !selectedChatCompare || // if chat is not selected or doesn't match current chat
@@ -339,8 +334,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
       "tri",
       params
     );
-    if(socket){
-
+    if (socket) {
       socket.emit("callXXX", selectedChat);
     }
   };
@@ -415,12 +409,13 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
               <Box className="messages">
                 {showMakeFriend && (
                   <Box
+                    
+                    fontSize={{ base: "100%", md: "100" }}
                     style={{
-                      position: "absolute",
-                      top: 133,
-                      right: 22,
-                      height: "31px",
-                      width: "1123px",
+                      position: "fixed",
+                      top: 130,
+
+                      width: "65.5%",
                       alignContent: "center",
                     }}
                   >
@@ -428,6 +423,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
                       display="flex"
                       background="#16A085"
                       w="100%"
+                      borderRadius= {5}
                       fontSize="20px"
                       color="white"
                       justifyContent={"center"}
@@ -441,16 +437,16 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
 
                 {showAcceptFriend && (
                   <Box
+                    fontSize={{ base: "100%", md: "100" }}
                     style={{
-                      position: "absolute",
-                      top: 133,
-                      right: 22,
-                      height: "31px",
-                      width: "1123px",
+                      position: "fixed",
+                      
+                      width: "66%",
                       alignContent: "center",
                     }}
                   >
                     <Text
+                    borderRadius= {5}
                       display="flex"
                       background="#16A085"
                       w="100%"
@@ -458,9 +454,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
                       color="white"
                       justifyContent={"center"}
                       onClick={handleAcceptFriend}
-                      isDis
                     >
-                      <BsPersonPlus />
+                      {!disable && <BsPersonCheck />}
                       {contentSendRequest}
                     </Text>
                   </Box>

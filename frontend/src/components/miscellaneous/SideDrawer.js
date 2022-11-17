@@ -9,7 +9,7 @@ import {
   MenuItem,
   MenuList,
 } from "@chakra-ui/menu";
-import { HiHome } from "react-icons/hi2";
+import { IoHome } from "react-icons/io5";
 import { FaUserFriends } from "react-icons/fa";
 import { TiGroup } from "react-icons/ti";
 import { MdOutlineLiveTv } from "react-icons/md";
@@ -29,7 +29,7 @@ import {
   DrawerOverlay,
 } from "@chakra-ui/modal";
 import { Tooltip } from "@chakra-ui/tooltip";
-import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import { BellIcon, ChevronDownIcon, Search2Icon } from "@chakra-ui/icons";
 import { Avatar } from "@chakra-ui/avatar";
 import { useHistory } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -46,7 +46,7 @@ import { ChatState } from "../../Context/ChatProvider";
 import GroupListItem from "../userAvatar/GroupListItem";
 
 function SideDrawer() {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [searchResult, setSearchResult] = useState([]);
   const [searchResultGroup, setsearchResultGroup] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -82,6 +82,7 @@ function SideDrawer() {
     console.log("Out", user);
     setuser(null);
     localStorage.removeItem("userInfo");
+    setSelectedChat(null);
     history.push("/");
   };
 
@@ -186,9 +187,10 @@ function SideDrawer() {
         p="5px 10px 5px 10px"
       >
         <Tooltip label="Search Users to chat" hasArrow placement="bottom-end">
-          <Button variant="ghost" onClick={onOpen}>
-            <i className="fas fa-search"></i>
+          <Button leftIcon={<Search2Icon />} variant="ghost" onClick={onOpen}>
+            
             <Text d={{ base: "none", md: "flex" }} px={4}>
+              
               Search User
             </Text>
           </Button>
@@ -201,7 +203,7 @@ function SideDrawer() {
             onClick={() => {
               history.push("/chats");
             }}
-            icon={<HiHome color="white" />}
+            icon={<IoHome color="white" />}
           />
           <IconButton
             variant="ghost"
@@ -264,8 +266,8 @@ function SideDrawer() {
             </MenuButton>
             <MenuList
               style={{
-                right: -10,
-                top:-5,
+                right: -80,
+                top: -9,
                 zIndex: 1,
                 position: "absolute",
               }}

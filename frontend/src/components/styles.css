@@ -5,6 +5,7 @@
   scrollbar-width: none;
   /* background-image: linear-gradient(180deg, #AED6F1, white); */
   border-radius: 5px;
+  width: 100%;
 }
 .singleChat{
   background-image: linear-gradient(180deg, white, #F2F3F4);

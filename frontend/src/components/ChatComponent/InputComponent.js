@@ -11,9 +11,33 @@ import { useState } from "react";
 import { Box } from "@chakra-ui/layout";
 import { IconButton, Grid, GridItem, useToast } from "@chakra-ui/react";
 import EmojiPicker from "emoji-picker-react";
-import {IoImageOutline} from "react-icons/io5"
+import { IoImageOutline } from "react-icons/io5";
 import "../styles.css";
 import { ChatState } from "../../Context/ChatProvider";
+import AWS from "aws-sdk";
+import { uploadFile } from "react-s3";
+
+const S3_BUCKET = "07-upload-image";
+const REGION = "ap-southeast-1";
+const ACCESS_KEY = "AKIA24335YBYTDKA2YT3";
+const SECRET_ACCESS_KEY = "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";
+
+const config = {
+  bucketName: S3_BUCKET,
+  region: REGION,
+  accessKeyId: ACCESS_KEY,
+  secretAccessKey: SECRET_ACCESS_KEY,
+};
+
+AWS.config.update({
+  accessKeyId: "AKIA24335YBYTDKA2YT3",
+  secretAccessKey: "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",
+});
+
+const myBucket = new AWS.S3({
+  params: { Bucket: S3_BUCKET },
+  region: REGION,
+});
 
 const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
   const [istyping, setIsTyping] = useState(false);
@@ -33,33 +57,31 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
     message += emoji;
     setNewMessage(message);
   };
- //Goi input upload hien ra de chon image
- const uploadImagine = () => {
-  const e3 = document.getElementById("imagine");
-  // const e4 = refImage.current;
-  e3.click();
-};
-//Goi input upload hien ra de chon file
-const deleteImageInInput = () => {
-  const e3 = document.getElementById("imagine");
-  
-  e3.value = "";
+  //Goi input upload hien ra de chon image
+  const uploadImagine = () => {
+    const e3 = document.getElementById("imagine");
+    // const e4 = refImage.current;
+    e3.click();
+  };
+  //Goi input upload hien ra de chon file
+  const deleteImageInInput = () => {
+    const e3 = document.getElementById("imagine");
 
-};
+    e3.value = "";
+  };
 
-//Goi input upload hien ra de chon file
-const deleteFileInInput = () => {
-  const e3 = document.getElementById("file");
-  // const e4 = refImage.current;
-  e3.value = "";
-
-};
-//Goi input upload hien ra de chon image
-const uploadFile = () => {
-  const e3 = document.getElementById("file");
-  // const e4 = refImage.current;
-  e3.click();
-};
+  //Goi input upload hien ra de chon file
+  const deleteFileInInput = () => {
+    const e3 = document.getElementById("file");
+    // const e4 = refImage.current;
+    e3.value = "";
+  };
+  //Goi input upload hien ra de chon image
+  const uploadFileLen = () => {
+    const e3 = document.getElementById("file");
+    // const e4 = refImage.current;
+    e3.click();
+  };
   // Ham gui tin nhan
   const sendMessage = async (event) => {
     // // param: sự kiện
@@ -119,6 +141,7 @@ const uploadFile = () => {
       }
     }, timerLength);
   };
+
   //Hàm xử lý ảnh
   const postDetails = (pics) => {
     setLoading(true);
@@ -135,7 +158,7 @@ const uploadFile = () => {
     // console.log(pics);
     if (pics.type === "image/jpeg" || pics.type === "image/png") {
       // setTimeout(() => {
-        const data = new FormData();
+      const data = new FormData();
       data.append("file", pics);
       data.append("upload_preset", "MongoChat04");
       data.append("cloud_name", "dfgkg5eej");
@@ -158,8 +181,7 @@ const uploadFile = () => {
       // }, 4000);
       console.log("CHAY CHAY NHE!!!");
       // submitHandler();
-    } 
-    else {
+    } else {
       toast({
         title: "Please Select an Image!",
         status: "warning",
@@ -193,7 +215,6 @@ const uploadFile = () => {
       // console.log(data);
       socket.emit("new message", data);
       deleteImageInInput();
-
     } catch (error) {
       toast({
         // Toast : 1. toast = useToast -> 2. xài
@@ -207,93 +228,89 @@ const uploadFile = () => {
     }
   };
   const submitHandlerFile = async (file1) => {
-    try {
-      const config = {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
-      setNewMessage(""); // xóa đi thông tin trong input
-      console.log("pic nè bạn ơii@@@@@@: ", file1);
-      const { data } = await axios.post(
-        "/api/message",
-        {
-          content: " file",
-          chatId: selectedChat,
-          file: file1,
-        },
-        config
-      );
-      // console.log(data);
-      socket.emit("new message", data);
-      deleteFileInInput();
-
-    } catch (error) {
+    setLoading(true);
+    if (file1 === undefined) {
+      setLoading(false);
       toast({
-        // Toast : 1. toast = useToast -> 2. xài
-        title: "Error Occured!",
-        description: "Failed to send the Message",
-        status: "error",
+        title: "Please Select an File!",
+        status: "warning",
         duration: 5000,
         isClosable: true,
         position: "bottom",
       });
+      return;
+    }
+    if (file1) {
+      uploadFile(file1, config)
+        .then(async (filee) => {
+          console.log("file: ", filee);
+          try {
+            const config = {
+              headers: {
+                "Content-type": "application/json",
+                Authorization: `Bearer ${user.token}`,
+              },
+            };
+            const { data } = await axios.post(
+              "/api/message/file",
+              {
+                fileName: filee.key,
+                chatId: selectedChat,
+                fileURL: filee.location,
+              },
+              config
+            );
+            socket.emit("new message", data);
+            // deleteImageInInput();
+            setLoading(true);
+          } catch (error) {
+            toast({
+              // Toast : 1. toast = useToast -> 2. xài
+              title: "Error Occured!",
+              description: "Failed to send the Message",
+              status: "error",
+              duration: 5000,
+              isClosable: true,
+              position: "bottom",
+            });
+          }
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+
+          setLoading(false);
+        });
     }
   };
 
- //Hàm xử lý file
- const postFile = (file1) => {
-  setLoading(true);
-  if (file1 === undefined) {
-    toast({
-      title: "Please Select an File!",
-      status: "warning",
-      duration: 5000,
-      isClosable: true,
-      position: "bottom",
-    });
-    return;
-  }
-  // console.log(pics);
-  if (file1) {
-    // setTimeout(() => {
-    const data = new FormData();
-    data.append("file", file1);
-    data.append("upload_preset", "MongoChat04");
-    data.append("cloud_name", "dfgkg5eej");
-    fetch("https://api.cloudinary.com/v1_1/dfgkg5eej/image/upload", {
-      method: "post",
-      body: data,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        // setPic(data.url.toString());
-        console.log(data);
-        // submitHandlerFile(data.url.toString());
-        console.log("DO DO DO ");
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
+  //Hàm xử lý file
+  const postFile = (file1) => {
+    setLoading(true);
+    if (file1 === undefined) {
+      toast({
+        title: "Please Select an File!",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
       });
-    // }, 4000);
-    console.log("CHAY CHAY NHE!!!");
-    // submitHandler();
-  } 
-  else {
-    toast({
-      title: "Please Select an File!",
-      status: "warning",
-      duration: 5000,
-      isClosable: true,
-      position: "bottom",
-    });
-    setLoading(false);
-    return;
-  }
-};
+      return;
+    }
+    // console.log(pics);
+    if (file1) {
+    } else {
+      toast({
+        title: "Please Select an File!",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+      setLoading(false);
+      return;
+    }
+  };
 
   const handleEmojiPickerhideShow = () => {
     setShowEmojiPicker(!showEmojiPicker);
@@ -352,7 +369,7 @@ const uploadFile = () => {
               colorScheme="teal"
               fontSize="20px"
               icon={<BsPaperclip />}
-              onClick={uploadFile}
+              onClick={uploadFileLen}
             />
 
             {/* <img src={Attach} alt=""  /> */}
@@ -361,7 +378,7 @@ const uploadFile = () => {
               style={{ display: "none" }}
               id="file"
               accept="file_extension"
-              onChange={(e) => postFile(e.target.files[0])}
+              onChange={(e) => submitHandlerFile(e.target.files[0])}
             />
           </Box>
         </GridItem>

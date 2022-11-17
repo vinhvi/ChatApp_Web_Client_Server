@@ -29,7 +29,8 @@ const Friendpage = () => {
         h="91.5vh"
         p="10px"
       >
-        {user && <MyFriends fetchAgain={fetchAgain} />}
+        {/* fetchAgain={fetchAgain}  */}
+        {user && <MyFriends />}
         <FriendTable fetchAgain={fetchAgain} />
       </Box>
     </div>

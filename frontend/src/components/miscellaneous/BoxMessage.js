@@ -21,9 +21,10 @@ import { Avatar } from "@chakra-ui/avatar";
 import { Tooltip } from "@chakra-ui/tooltip";
 import { ChatState } from "../../Context/ChatProvider";
 import ProfileModal from "./ProfileModal";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { DragHandleIcon, RepeatIcon } from "@chakra-ui/icons";
 import axios from "axios";
+import files from "../../img/folder.png";
 
 var displayText = "block";
 
@@ -31,7 +32,6 @@ const BoxMessage = ({ messages, m, i, socket }) => {
   const [isShown, setIsShown] = useState("none");
   const [mess, setmess] = useState();
   const toast = useToast();
-  const ref = useRef(null);
   const handlePic = (pic) => {
     if (pic) {
       displayText = "none";
@@ -65,7 +65,6 @@ const BoxMessage = ({ messages, m, i, socket }) => {
   const handleShowMenu = () => {
     setIsShown("flex");
     setmess(m);
-    return ref.current.offsetWidth;
   };
 
   const handleMessageClick = async (event) => {
@@ -117,19 +116,17 @@ const BoxMessage = ({ messages, m, i, socket }) => {
       <Box style={{ display: "flex" }} key={m._id}>
         {(isSameSender(messages, m, i, user._id) ||
           isLastMessage(messages, i, user._id)) && (
-          <Tooltip label={m.sender.name} placement="bottom-start" hasArrow>
-            <ProfileModal user={m.sender}>
-              <Avatar
-                mt="7px"
-                mr={1}
-                size="sm"
-                cursor="pointer"
-                name={m.sender.name}
-                src={m.sender.pic}
-                onClick={() => handleSelected()}
-              />
-            </ProfileModal>
-          </Tooltip>
+          <ProfileModal user={m.sender}>
+            <Avatar
+              mt="7px"
+              mr={1}
+              size="sm"
+              cursor="pointer"
+              name={m.sender.name}
+              src={m.sender.pic}
+              onClick={() => handleSelected()}
+            />
+          </ProfileModal>
         )}
         {!m.recallMessage && (
           <>
@@ -143,69 +140,6 @@ const BoxMessage = ({ messages, m, i, socket }) => {
                 setmess(null);
               }}
             >
-              {m.content === "file" && (
-                <>
-                  <Box
-                    display="flex"
-                    // bg="red"
-                    // right="230px"
-                    width="100%"
-                    justifyContent={"space-between"}
-                  >
-                    <Box
-                      style={{
-                        margin: isSameSenderMargin(messages, m, i, user._id),
-                        marginTop: isSameUser(messages, m, i, user._id)
-                          ? 3
-                          : 10,
-                        minWidth: "0px",
-                        maxWidth: "500px",
-                        zIndex: "1",
-                        background: "blue",
-                        // width: "50%",
-                        position: "relative",
-                      }}
-                      ref={ref}
-                    >
-                     
-                      <Image borderRadius={5} src={handlePic(m.file)} />
-                      <Menu>
-                        <MenuButton
-                          as={IconButton}
-                          fontSize="15px"
-                          size="xs"
-                          style={{
-                            zIndex: "162",
-                            backgroundColor: "white",
-                            position: "absolute",
-                            // mr: "100px",
-                            bottom: 200,
-                            right: showMenu(m, i, user._id) ? 500 : -30,
-                            display: `${isShown}`,
-                          }}
-                          icon={<DragHandleIcon />}
-                          onClick={() => setIsShown("flex")}
-                        />
-                        <MenuList
-                          mt="-20px"
-                          style={{
-                            right: showMenu(m, i, user._id) ? 0 : -240,
-                            zIndex: "2",
-                            d: "flex",
-                            position: "absolute",
-                          }}
-                        >
-                          <MenuItem color="red" onClick={handleMessageClick}>
-                            <RepeatIcon colorScheme="red" mr="10px" />
-                            Recall Message
-                          </MenuItem>
-                          <MenuDivider />
-                        </MenuList>
-                      </Menu>
-                    </Box>
-                  </Box>
-                </>
-              )}
               {m.content === "image" ? (
                 <>
                   <Box
@@ -222,15 +156,17 @@ const BoxMessage = ({ messages, m, i, socket }) => {
                           ? 3
                           : 10,
                         minWidth: "0px",
-                        maxWidth: "500px",
+                        maxWidth: "300px",
                         zIndex: "1",
-                        background: "blue",
+                        
                         // width: "50%",
                         position: "relative",
                       }}
-                      ref={ref}
                     >
-                      <Image borderRadius={5} src={handlePic(m.pic)} />
+                      <Image 
+                      minHeight="0px"
+                      maxHeight="300px"
+                      borderRadius={5} src={handlePic(m.pic)} />
                       <Menu>
                         <MenuButton
                           as={IconButton}
@@ -241,8 +177,8 @@ const BoxMessage = ({ messages, m, i, socket }) => {
                             backgroundColor: "white",
                             position: "absolute",
                             // mr: "100px",
-                            bottom: 200,
-                            right: showMenu(m, i, user._id) ? 500 : -30,
+                            bottom: 0,
+                            right: showMenu(m, i, user._id) ? `${m.pic}`.size  : -30,
                             display: `${isShown}`,
                           }}
                           icon={<DragHandleIcon />}
@@ -258,7 +194,7 @@ const BoxMessage = ({ messages, m, i, socket }) => {
                           }}
                         >
                           <MenuItem color="red" onClick={handleMessageClick}>
-                            <RepeatIcon colorScheme="red" mr="10px" />
+                            <RepeatIcon color="red" mr="10px" />
                             Recall Message
                           </MenuItem>
                           <MenuDivider />
@@ -268,75 +204,158 @@ const BoxMessage = ({ messages, m, i, socket }) => {
                   </Box>
                 </>
               ) : (
-                <Box
-                  // onMouseOver={() => setIsShown("flex")}
-                  style={{
-                    backgroundColor: `${
-                      m.sender._id === user._id ? "#B9F5D0" : "#ffffff"
-                    }`,
-                    margin: isSameSenderMargin(messages, m, i, user._id),
-                    marginTop: isSameUser(messages, m, i, user._id) ? 3 : 10,
-                    borderRadius: "8px",
-                    padding: "5px 15px",
-                    minWidth: "140px",
-                    maxWidth: "80%",
-                    height: "70",
-                  }}
-                  ref={ref}
-                >
-                  <Text>{handleContent(m.content)}</Text>
-
-                  <Box
-                    display="flex"
-                    // bg="red"
-                    mt={3}
-                    justifyContent={"space-between"}
-                  >
-                    <Text
-                      fontSize="15px"
-                      color="gray"
-                      paddingRight="0px"
-                      display="flex"
+                <>
+                  {m.file !== undefined ? (
+                    <a
+                      style={{
+                        display:"flex",
+                        backgroundColor: `${
+                          m.sender._id === user._id ? "#B9F5D0" : "#ffffff"
+                        }`,
+                        margin: isSameSenderMargin(messages, m, i, user._id),
+                        marginTop: isSameUser(messages, m, i, user._id)
+                          ? 3
+                          : 10,
+                        borderRadius: "8px",
+                        padding: "5px 15px",
+                        minWidth: "140px",
+                        maxWidth: "80%",
+                        height: "70",
+                      }}
+                      href={m.file}
                     >
-                      {handleTimeSend(m.createdAt)}
-                    </Text>
-                    <Menu>
-                      <MenuButton
-                        as={IconButton}
-                        fontSize="15px"
-                        size="xs"
-                        style={{
-                          backgroundColor: "white",
-                          position: "relative",
-                          mr: "0px",
-                          display: `${isShown}`,
-                          // zIndex: "1",
-                        }}
-                        icon={<DragHandleIcon />}
-                        onClick={() => setIsShown("flex")}
-                      />
-                      <MenuList
-                        mt="-20px"
-                        // position={"fixed"}
-                        // zIndex={2}
-                        style={{
-                          // margin: showMenu(messages, m, i, user._id),
-                          right: showMenu(m, i, user._id) ? 0 : -240,
-                          zIndex: "2",
-                          d: "flex",
-                          position: "absolute",
-                          // top: "200px",
-                        }}
+                        <Image src={files} mr={5}/>
+                      <Box >
+                        <Text fontWeight="bold">{handleContent(m.content)}</Text>
+
+                        <Box
+                          display="flex"
+                          // bg="red"
+                          mt={3}
+                          justifyContent={"space-between"}
+                        >
+                          <Text
+                            fontSize="15px"
+                            color="gray"
+                            paddingRight="0px"
+                            display="flex"
+                          >
+                            {handleTimeSend(m.createdAt)}
+                          </Text>
+                          <Menu>
+                            <MenuButton
+                              as={IconButton}
+                              fontSize="15px"
+                              size="xs"
+                              style={{
+                                backgroundColor: "white",
+                                position: "relative",
+                                mr: "0px",
+                                display: `${isShown}`,
+                                // zIndex: "1",
+                              }}
+                              icon={<DragHandleIcon />}
+                              onClick={() => setIsShown("flex")}
+                            />
+                            <MenuList
+                              mt="-20px"
+                              // position={"fixed"}
+                              // zIndex={2}
+                              style={{
+                                // margin: showMenu(messages, m, i, user._id),
+                                right: showMenu(m, i, user._id) ? 0 : -240,
+                                zIndex: "2",
+                                d: "flex",
+                                position: "absolute",
+                                // top: "200px",
+                              }}
+                            >
+                              <MenuItem
+                                color="red"
+                                onClick={handleMessageClick}
+                              >
+                                <RepeatIcon color="red" mr="10px" />
+                                Recall Message
+                              </MenuItem>
+                              <MenuDivider />
+                            </MenuList>
+                          </Menu>
+                        </Box>
+                      </Box>
+                    </a>
+                  ) : (
+                    <Box
+                      // onMouseOver={() => setIsShown("flex")}
+                      style={{
+                        backgroundColor: `${
+                          m.sender._id === user._id ? "#B9F5D0" : "#ffffff"
+                        }`,
+                        margin: isSameSenderMargin(messages, m, i, user._id),
+                        marginTop: isSameUser(messages, m, i, user._id)
+                          ? 3
+                          : 10,
+                        borderRadius: "8px",
+                        padding: "5px 15px",
+                        minWidth: "140px",
+                        maxWidth: "80%",
+                        height: "70",
+                      }}
+                    >
+                      <Text>{handleContent(m.content)}</Text>
+
+                      <Box
+                        display="flex"
+                        // bg="red"
+                        mt={3}
+                        justifyContent={"space-between"}
                       >
-                        <MenuItem color="red" onClick={handleMessageClick}>
-                          <RepeatIcon colorScheme="red" mr="10px" />
-                          Recall Message
-                        </MenuItem>
-                        <MenuDivider />
-                      </MenuList>
-                    </Menu>
-                  </Box>
-                </Box>
+                        <Text
+                          fontSize="15px"
+                          color="gray"
+                          paddingRight="0px"
+                          display="flex"
+                        >
+                          {handleTimeSend(m.createdAt)}
+                        </Text>
+                        <Menu>
+                          <MenuButton
+                            as={IconButton}
+                            fontSize="15px"
+                            size="xs"
+                            style={{
+                              backgroundColor: "white",
+                              position: "relative",
+                              mr: "0px",
+                              display: `${isShown}`,
+                              // zIndex: "1",
+                            }}
+                            icon={<DragHandleIcon />}
+                            onClick={() => setIsShown("flex")}
+                          />
+                          <MenuList
+                            mt="-20px"
+                            // position={"fixed"}
+                            // zIndex={2}
+                            style={{
+                              // margin: showMenu(messages, m, i, user._id),
+                              right: showMenu(m, i, user._id) ? 0 : -240,
+                              zIndex: "2",
+                              d: "flex",
+                              position: "absolute",
+                              // top: "200px",
+                            }}
+                          >
+                            <MenuItem color="red" onClick={handleMessageClick}>
+                              <RepeatIcon color="red" mr="10px" />
+                              Recall Message
+                            </MenuItem>
+                            <MenuDivider />
+                          </MenuList>
+                        </Menu>
+                      </Box>
+                    </Box>
+                  )}
+                </>
               )}
             </Box>
           </>

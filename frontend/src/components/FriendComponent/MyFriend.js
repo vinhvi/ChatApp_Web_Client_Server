@@ -1,5 +1,6 @@
 import { AddIcon } from "@chakra-ui/icons";
-import { Box, Stack, Text } from "@chakra-ui/layout";
+import { Text, Box } from "@chakra-ui/react";
+import {  Stack } from "@chakra-ui/layout";
 import { useToast } from "@chakra-ui/toast";
 import axios from "axios";
 import { useDisclosure } from "@chakra-ui/hooks";
@@ -20,9 +21,8 @@ import { Divider } from "@chakra-ui/react";
 import UserListItem from "../userAvatar/UserListItem";
 import ChatLoading from "../ChatLoading";
 
-const MyFriends = ({ fetchAgain }) => {
-  const { user, setSelectedChat, chats, setChats } =
-    ChatState();
+const MyFriends = () => {
+  const { user, setSelectedChat, chats, setChats } = ChatState();
 
   const toast = useToast();
   const [friends, setFriens] = useState([]);
@@ -44,7 +44,7 @@ const MyFriends = ({ fetchAgain }) => {
 
   useEffect(() => {
     fetchFriend();
-  }, [fetchAgain]);
+  }, []);
 
   const fetchFriend = async () => {
     try {
@@ -185,7 +185,7 @@ const MyFriends = ({ fetchAgain }) => {
                     {friends ? (
                       <Stack overflowY="scroll">
                         {friends.map((friend) => (
-                          <Box>
+                          <Box key={friend._id}>
                             <Text fontSize="20px">
                               <UserListItem
                                 key={friend._id}
