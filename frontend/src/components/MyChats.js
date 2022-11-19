@@ -54,7 +54,7 @@ const MyChats = ({ fetchAgain, socket }) => {
       const { data } = await axios.get("/api/chat", config);
       // console.log("XXX", user.token);
       setChats(data);
-      // console.log("MYCHAT socket:", socket);
+      console.log("MYCHAT data:", data);
     } catch (error) {
       toast({
         title: "Error Occured!",
@@ -84,7 +84,6 @@ const MyChats = ({ fetchAgain, socket }) => {
   };
   useEffect(() => {
     if (socket) {
-      console.log("MY CHAT: ", socket);
       socket.on("message recieved", (newMessageRecieved) => {
         console.log("on: ", socket);
         xuLyChats(chats, newMessageRecieved);

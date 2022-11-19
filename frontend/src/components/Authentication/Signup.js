@@ -12,10 +12,10 @@ const Signup = () => {
   const handleClick = () => setShow(!show); // click -> show
 
   // const [picLoading, setPicLoading] = useState(false);
-  const [name, setName] = useState();
-  const [email, setEmail] = useState();
-  const [confirmpassword, setConfirmpassword] = useState();
-  const [password, setPassword] = useState();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [confirmpassword, setConfirmpassword] = useState('');
+  const [password, setPassword] = useState('');
   const [pic, setPic] = useState();
   const [loading, setLoading] = useState(false);
   const toast = useToast();
@@ -23,10 +23,32 @@ const Signup = () => {
 
   const submitHandler = async () => {
     setLoading(true);
-    if (!name || !email || !password || !confirmpassword) {
+    var regex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+    if (name.length<=0) {
       toast({
-        title: "Please Fill all the Feilds",
-        status: "warning",
+        title: "Please Enter your name ",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+      setLoading(false);
+      return;
+    }
+    if(!regex.test(email)){
+      toast({
+        title: "Wrong syntax",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+      setLoading(false);
+      return;
+    }if(password.length <= 6){
+      toast({
+        title: "Password must be more than 6 characters",
+        status: "error",
         duration: 5000,
         isClosable: true,
         position: "bottom",
@@ -42,6 +64,7 @@ const Signup = () => {
         isClosable: true,
         position: "bottom",
       });
+      setLoading(false);
       return;
     }
     console.log(name, email, password, pic);
@@ -137,7 +160,7 @@ const Signup = () => {
         <FormLabel>Name</FormLabel>
         <Input
           placeholder="Enter Your Name"
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => setName(e.target.value)} 
         />
       </FormControl>
       <FormControl id="email" isRequired>
@@ -146,6 +169,7 @@ const Signup = () => {
           type="email"
           placeholder="Enter Your Email Address"
           onChange={(e) => setEmail(e.target.value)}
+          
         />
       </FormControl>
       <FormControl id="password" isRequired>

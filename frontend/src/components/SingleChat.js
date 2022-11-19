@@ -248,7 +248,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
       socket.on("typing", () => setIsTyping(true));
       socket.on("stop typing", () => setIsTyping(false));
     }
-  }, []);
+  });
 
   useEffect(() => {
     if (socket) {

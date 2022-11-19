@@ -1,11 +1,12 @@
 import { Avatar } from "@chakra-ui/avatar";
-import { Box, Text } from "@chakra-ui/layout";
+import { Box, Text,TagRightIcon } from "@chakra-ui/react";
 import { ChatState } from "../../Context/ChatProvider";
 import { CloseIcon } from "@chakra-ui/icons";
 
 const UserListItemGroup = ({ user, handleFunction, admin }) => {
   return (
     <Box
+
       onClick={handleFunction}
       cursor="pointer"
       bg="#E8E8E8"
@@ -21,7 +22,10 @@ const UserListItemGroup = ({ user, handleFunction, admin }) => {
       py={2}
       mb={2}
       borderRadius="lg"
+      
+      
     >
+      
       <Avatar
         mr={2}
         size="sm"
@@ -34,9 +38,9 @@ const UserListItemGroup = ({ user, handleFunction, admin }) => {
         <Text fontSize="xs">
         {admin._id === user._id && <span> (Owner)</span>}
         </Text>
-        
       </Box>
-      <CloseIcon pl={1} />
+        <TagRightIcon as={CloseIcon} />
+      
     </Box>
   );
 };

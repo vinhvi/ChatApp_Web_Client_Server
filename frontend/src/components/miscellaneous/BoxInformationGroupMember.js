@@ -33,7 +33,9 @@ const BoxInformationChat = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
 
   const handleSearch = async (query) => {
     setSearch(query);
+    console.log("query :", search);
     if (!query) {
+      setSearchResult(null);
       return;
     }
 
@@ -44,8 +46,8 @@ const BoxInformationChat = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const { data } = await axios.get(`/api/user?search=${search}`, config);
-      console.log(data);
+      const { data } = await axios.get(`/api/user?search=${query}`, config);
+      console.log("SEARCH GROUP: ",data);
       setLoading(false);
       setSearchResult(data);
     } catch (error) {
@@ -266,6 +268,7 @@ const BoxInformationChat = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
                   user={u}
                   handleFunction={() => handleRemove(u)}
                   admin={selectedChat.groupAdmin}
+                  
                 />
               ))}
         </Box>
