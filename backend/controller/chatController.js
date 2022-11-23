@@ -88,9 +88,19 @@ const fetchChat = asycnHandler(async (req, res) => {
   // get all from user cu the
   try {
     Chat.find({
-      $and: [
-        { users: { $elemMatch: { $eq: req.user._id } } },
-        { latestMessage: { $ne: null } },
+      $or: [
+        {
+          $and: [
+            {isGroupChat: true },
+            { users: { $elemMatch: { $eq: req.user._id } } },
+          ],
+        },
+        {
+          $and: [
+            { users: { $elemMatch: { $eq: req.user._id } } },
+            { latestMessage: { $ne: null } },
+          ],
+        },
       ],
     })
       .populate("users", "-password")
@@ -197,25 +207,24 @@ const addFromGroup = asycnHandler(async (req, res, next) => {
 });
 const removeFromGroup = asycnHandler(async (req, res, next) => {
   const { chatId, userId } = req.body;
-  const chat = await Chat.findById(chatId)
-  if( chat.groupAdmin !=  userId ){
+  const chat = await Chat.findById(chatId);
+  if (chat.groupAdmin != userId) {
     console.log("XOA KO XOA ADMIN");
-  const updateGroup = await Chat.findByIdAndUpdate(
-    chatId,
-    {
-      $pull: { users: userId },
-    },
-    { new: true }
-  )
-    .populate("users", "-password")
-    .populate("groupAdmin", "-password");
-  if (updateGroup) res.json(updateGroup);
-  else {
-    res.status(404);
-    throw new Error("Chat is not found");
-  }
-  }
-  else if(chat.groupAdmin ==  userId && chat.users.length > 1){ 
+    const updateGroup = await Chat.findByIdAndUpdate(
+      chatId,
+      {
+        $pull: { users: userId },
+      },
+      { new: true }
+    )
+      .populate("users", "-password")
+      .populate("groupAdmin", "-password");
+    if (updateGroup) res.json(updateGroup);
+    else {
+      res.status(404);
+      throw new Error("Chat is not found");
+    }
+  } else if (chat.groupAdmin == userId && chat.users.length > 1) {
     console.log("XOA ADMIN");
     const updateGroup = await Chat.findByIdAndUpdate(
       chatId,
@@ -223,11 +232,12 @@ const removeFromGroup = asycnHandler(async (req, res, next) => {
         $pull: { users: userId },
       },
       { new: true }
-      );
-      const adminNextGeneration = updateGroup.users[0];
-      console.log("adminNextGeneration", adminNextGeneration);
-    const updateGroup2 = await Chat.findByIdAndUpdate(chatId,
-      {groupAdmin :  adminNextGeneration})
+    );
+    const adminNextGeneration = updateGroup.users[0];
+    console.log("adminNextGeneration", adminNextGeneration);
+    const updateGroup2 = await Chat.findByIdAndUpdate(chatId, {
+      groupAdmin: adminNextGeneration,
+    })
       .populate("users", "-password")
       .populate("groupAdmin", "-password");
     if (updateGroup) res.json(updateGroup2);
@@ -235,20 +245,21 @@ const removeFromGroup = asycnHandler(async (req, res, next) => {
       res.status(404);
       throw new Error("Chat is not found");
     }
-  }
-  else{
-    const x = await Chat.findByIdAndDelete(chatId)
-    res.json({data: "Mat het"});
+  } else {
+    const x = await Chat.findByIdAndDelete(chatId);
+    res.json({ data: "Mat het" });
     console.log("xoa het");
   }
 });
 const searchGroupChat = asycnHandler(async (req, res) => {
   try {
+    // console.log(ObjectId(req.query.id));
     const chats = await Chat.find({
       users: { $elemMatch: { $eq: req.query.id } },
     }).find({
       chatName: { $regex: req.query.chatName, $options: "i" },
     });
+    console.log(chats);
     res.send(chats);
   } catch (error) {
     res.status(404);

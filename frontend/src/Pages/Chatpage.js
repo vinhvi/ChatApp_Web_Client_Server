@@ -3,24 +3,12 @@ import { useEffect, useState, useContext } from "react";
 import Chatbox from "../components/Chatbox";
 import MyChats from "../components/MyChats";
 import SideDrawer from "../components/miscellaneous/SideDrawer";
-import { ChatState, ChatContext } from "../Context/ChatProvider";
 import { useHistory } from "react-router-dom";
 import io from "socket.io-client";
 import CallModal from "../components/Call/CallModal";
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Button,
   useDisclosure,
-  FormControl,
-  Input,
   useToast,
-  IconButton,
 } from "@chakra-ui/react";
 import { getUserOther } from "../config/ChatLogics";
 // CallModal

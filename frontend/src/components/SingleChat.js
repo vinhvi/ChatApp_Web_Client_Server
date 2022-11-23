@@ -257,15 +257,13 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
           !selectedChatCompare || // if chat is not selected or doesn't match current chat
           selectedChatCompare._id !== mess.chat._id
         ) {
-          // console.log("IFFF");
+          return;
         } else {
           xuLyRecall(messages, mess);
           setMessages(messages);
         }
       });
-    } else {
-      setSelectedChat(chats[chats.length - 1]);
-    }
+    } 
   }, [messages]);
 
   const xuLyRecall = (messages, data) => {
@@ -464,6 +462,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain, socket, socketConnected }) => {
                   messages={messages}
                   socket={socket}
                 ></ScrollableChat>
+                
               </Box>
             )}
             {istyping ? (

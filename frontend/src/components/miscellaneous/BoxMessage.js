@@ -27,7 +27,7 @@ import axios from "axios";
 import files from "../../img/folder.png";
 
 var displayText = "block";
-
+var displayRecall = "block";
 const BoxMessage = ({ messages, m, i, socket }) => {
   const [isShown, setIsShown] = useState("none");
   const [mess, setmess] = useState();
@@ -86,9 +86,9 @@ const BoxMessage = ({ messages, m, i, socket }) => {
           },
           config
         );
-        console.log("BOX MESSAGE: ", data);
+        // console.log("BOX MESSAGE: ", data);
+        // xuLyMess(messages, data);
         socket.emit("recall message", data);
-        xuLyMess(messages, data);
       } catch (e) {
         toast({
           title: "Error Occured!",
@@ -102,14 +102,16 @@ const BoxMessage = ({ messages, m, i, socket }) => {
     }
   };
 
-  const xuLyMess = (messages, data) => {
-    messages.forEach((messa) => {
-      if (messa._id == data._id) {
-        messa.content = "BOX MESSAGE";
-        mess.recallMessage = 1;
-      }
-    });
-  };
+  // const xuLyMess = (messages, data) => {
+  //   messages.forEach((messa) => {
+  //     if (messa._id == data._id) {
+  //       // messa.content = "BOX MESSAGE";
+  //       data.recallMessage = 1;
+        
+  //     }
+  //     console.log(messa);
+  //   });
+  // };
 
   return (
     <>
@@ -163,10 +165,11 @@ const BoxMessage = ({ messages, m, i, socket }) => {
                         position: "relative",
                       }}
                     >
-                      <Image 
+                      <img 
                       minHeight="0px"
                       maxHeight="300px"
                       borderRadius={5} src={handlePic(m.pic)} />
+                      <Text />
                       <Menu>
                         <MenuButton
                           as={IconButton}
@@ -376,7 +379,7 @@ const BoxMessage = ({ messages, m, i, socket }) => {
               padding: "5px 15px",
               maxWidth: "80%",
               height: "70",
-              display: `${displayText}`,
+              display: "block",
             }}
           >
             <Text color="gray">Message Recall</Text>
@@ -391,6 +394,7 @@ const BoxMessage = ({ messages, m, i, socket }) => {
           </Box>
         )}
       </Box>
+      
     </>
   );
 };

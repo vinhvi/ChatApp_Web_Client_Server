@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 // import {useState} from "react-usestateref"
 import { useHistory } from "react-router-dom";
-import Chatpage from "../Pages/Chatpage";
-import { Route } from "react-router-dom";
 
 export const ChatContext = createContext({});
 // contextAPI: qly state of our app -> fetch state directly from 1 place
@@ -17,11 +15,18 @@ const ChatProvider = ({ children }) => {
   const [chats, setChats] = useState([]);
   const [socket, setSocket] = useState();
   const [input, setInput] = useState([]);
+  const [selectedFriend, setselectedFriend] = useState(false);
   const history = useHistory();
 
   useEffect(() => {
     if (user) {
-      history.push("/chats");
+      if(selectedFriend){
+        history.push("/friend");
+      }
+      else{
+        history.push("/chats");
+      }
+      
     } else {
       history.push("/");
     }
@@ -37,6 +42,8 @@ const ChatProvider = ({ children }) => {
         setNotification,
         chats,
         setChats,
+        selectedFriend,
+        setselectedFriend,
         socket,
         setSocket,
         input,

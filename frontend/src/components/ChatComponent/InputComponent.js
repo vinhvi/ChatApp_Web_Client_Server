@@ -2,7 +2,7 @@ import { FormControl } from "@chakra-ui/form-control";
 import { Input } from "@chakra-ui/input";
 import {
   BsFillEmojiSmileFill,
-  BsMicFill,
+  
   BsPaperclip,
   BsFillArrowRightCircleFill,
 } from "react-icons/bs";
@@ -34,18 +34,16 @@ AWS.config.update({
   secretAccessKey: "x1bnII3kfXgVYKND7U2ZQQbLPvXiudVtOASBFgHc",
 });
 
-const myBucket = new AWS.S3({
-  params: { Bucket: S3_BUCKET },
-  region: REGION,
-});
+
 
 const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
-  const [istyping, setIsTyping] = useState(false);
+  
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const [typing, setTyping] = useState(false);
   const toast = useToast();
   const [loading, setLoading] = useState(false); // load, xoay vong vong
+
   // const [pic, setPic] = useState();
   const { input, setInput } = ChatState();
   const handleEmojiClick = (event) => {
@@ -227,10 +225,12 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
       });
     }
   };
-  const submitHandlerFile = async (file1) => {
+  const submitHandlerFile = async (e) => {
     setLoading(true);
-    if (file1 === undefined) {
-      setLoading(false);
+    const objectFile = e.target.files;
+    const checkedFiles = [];
+    setLoading(true);
+    if (objectFile.length === 0) {
       toast({
         title: "Please Select an File!",
         status: "warning",
@@ -238,9 +238,32 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
         isClosable: true,
         position: "bottom",
       });
+      deleteFileInInput();
+      setLoading(false);
       return;
     }
-    if (file1) {
+    // console.log(pics);
+    else {
+      for (let i = 0; i < objectFile.length; i++) {
+        if (objectFile[i].size > 1048576) {
+          // console.log(objectFile[i].size);
+          toast({
+            title: "Size of File is too big",
+            status: "warning",
+            duration: 5000,
+            isClosable: true,
+            position: "bottom",
+          });
+          deleteFileInInput();
+          setLoading(false);
+          return;
+        }
+
+        checkedFiles.push(objectFile[i]);
+      }
+    }
+
+    checkedFiles.forEach((file1) => {
       uploadFile(file1, config)
         .then(async (filee) => {
           console.log("file: ", filee);
@@ -278,39 +301,13 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
         })
         .catch((err) => {
           console.error(err);
-
+          deleteFileInInput();
           setLoading(false);
         });
-    }
+    });
+    setLoading(false);
   };
 
-  //Hàm xử lý file
-  const postFile = (file1) => {
-    setLoading(true);
-    if (file1 === undefined) {
-      toast({
-        title: "Please Select an File!",
-        status: "warning",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom",
-      });
-      return;
-    }
-    // console.log(pics);
-    if (file1) {
-    } else {
-      toast({
-        title: "Please Select an File!",
-        status: "warning",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom",
-      });
-      setLoading(false);
-      return;
-    }
-  };
 
   const handleEmojiPickerhideShow = () => {
     setShowEmojiPicker(!showEmojiPicker);
@@ -378,7 +375,8 @@ const InputComponent = ({ socketConnected, socket, selectedChat, user }) => {
               style={{ display: "none" }}
               id="file"
               accept="file_extension"
-              onChange={(e) => submitHandlerFile(e.target.files[0])}
+              multiple
+              onChange={(e) => submitHandlerFile(e)}
             />
           </Box>
         </GridItem>

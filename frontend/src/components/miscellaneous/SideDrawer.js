@@ -44,9 +44,10 @@ import { getSender } from "../../config/ChatLogics";
 import UserListItem from "../userAvatar/UserListItem";
 import { ChatState } from "../../Context/ChatProvider";
 import GroupListItem from "../userAvatar/GroupListItem";
+import UpdateProfileModal from "./UpdateProfileModal";
 
 function SideDrawer() {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [searchResultGroup, setsearchResultGroup] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -58,9 +59,10 @@ function SideDrawer() {
     notification,
     setNotification,
     chats,
+    selectedFriend,
+    setselectedFriend,
     setChats,
     input,
-    setInput,
   } = ChatState();
   useEffect(() => {
     // console.log("MY CHAT: ", input);
@@ -71,15 +73,12 @@ function SideDrawer() {
     if (user == null) {
       history.go(0);
     }
-
-    console.log("side drawer :", user);
-  }, []);
+  }, [history]);
 
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const logoutHandler = () => {
-    console.log("Out", user);
     setuser(null);
     localStorage.removeItem("userInfo");
     setSelectedChat(null);
@@ -87,6 +86,7 @@ function SideDrawer() {
   };
 
   const handleSearch = async () => {
+    setSearchResult([]);
     if (!search) {
       toast({
         title: "Please Enter something in search",
@@ -98,6 +98,38 @@ function SideDrawer() {
       return;
     }
 
+
+    
+    try {
+      setLoading(true);
+
+      const config = {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      const { data } = await axios.get(
+        `/api/friend/findUserFriend?search=${search}&userId=${user._id}`,
+        config
+      );
+      if(data.length > 0){
+        console.log("BAN",data);
+        setSearchResult(data);
+        setLoading(false);
+      }
+     
+    } catch (error) {
+      toast({
+        title: "Error Occured!",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
     try {
       setLoading(true);
 
@@ -108,9 +140,10 @@ function SideDrawer() {
       };
 
       const { data } = await axios.get(`/api/user?search=${search}`, config);
-
-      setLoading(false);
-      setSearchResult(data);
+      if(data.length > 0){
+        setSearchResult(data);
+        console.log("in ra ne");
+      }
     } catch (error) {
       toast({
         title: "Error Occured!",
@@ -122,21 +155,24 @@ function SideDrawer() {
       });
     }
 
+    
     try {
       setLoading(true);
 
       const config = {
         headers: {
+          "Content-type": "application/json",
           Authorization: `Bearer ${user.token}`,
         },
       };
 
       const { data } = await axios.get(
-        `/api/chat/searchGroupChat?chatName=${search}&id=${user._id}`,
+        `/api/chat/searchGroupChat?id=${user._id}&chatName=${search}`,
         config
       );
       setLoading(false);
       setsearchResultGroup(data);
+      console.log("toi");
     } catch (error) {
       toast({
         title: "Error Occured!",
@@ -187,10 +223,13 @@ function SideDrawer() {
         p="5px 10px 5px 10px"
       >
         <Tooltip label="Search Users to chat" hasArrow placement="bottom-end">
-          <Button leftIcon={<Search2Icon />} variant="ghost" onClick={onOpen}>
-            
-            <Text d={{ base: "none", md: "flex" }} px={4}>
-              
+          <Button
+            _hover={{ background: "gray.400" }}
+            leftIcon={<Search2Icon color="white" />}
+            variant="ghost"
+            onClick={onOpen}
+          >
+            <Text d={{ base: "none", md: "flex" }} color="white" px={4}>
               Search User
             </Text>
           </Button>
@@ -200,8 +239,13 @@ function SideDrawer() {
             variant="ghost"
             fontSize="35px"
             size="lg"
+            _hover={{ background: "gray.400" }}
             onClick={() => {
               history.push("/chats");
+              setselectedFriend(false);
+            }}
+            style={{
+              background: `${selectedFriend === false ? "gray" : "117A65"}`,
             }}
             icon={<IoHome color="white" />}
           />
@@ -209,8 +253,14 @@ function SideDrawer() {
             variant="ghost"
             fontSize="35px"
             size="lg"
+            _hover={{ background: "gray.400" }}
             onClick={() => {
               history.push("/friend");
+              setselectedFriend(true);
+              console.log(selectedFriend);
+            }}
+            style={{
+              background: `${selectedFriend === true ? "gray" : "117A65"}`,
             }}
             icon={<FaUserFriends color="white" />}
           />
@@ -218,6 +268,7 @@ function SideDrawer() {
             variant="ghost"
             fontSize="35px"
             size="lg"
+            _hover={{ background: "gray.400" }}
             icon={<TiGroup color="white" />}
           />
 
@@ -225,6 +276,7 @@ function SideDrawer() {
             variant="ghost"
             fontSize="35px"
             size="lg"
+            _hover={{ background: "gray.400" }}
             icon={<MdOutlineLiveTv color="white" />}
           />
         </Box>
@@ -275,7 +327,9 @@ function SideDrawer() {
               <ProfileModal user={user}>
                 <MenuItem>My Profile</MenuItem>{" "}
               </ProfileModal>
-              <MenuItem>Update my profile</MenuItem>
+              <UpdateProfileModal user={user}>
+                <MenuItem>Update my profile</MenuItem>
+              </UpdateProfileModal>
               <MenuDivider />
               <MenuItem onClick={logoutHandler}>Logout</MenuItem>
             </MenuList>
@@ -309,7 +363,7 @@ function SideDrawer() {
                       <AccordionIcon />
                     </AccordionButton>
                     <AccordionPanel pb={4}>
-                      {searchResult?.map((user, i) => (
+                      {searchResult?.map((user) => (
                         <UserListItem
                           key={user._id}
                           user={user}

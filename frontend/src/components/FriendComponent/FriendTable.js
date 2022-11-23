@@ -1,9 +1,4 @@
-import { Box, Text } from "@chakra-ui/layout";
-import { IconButton, Spinner, useToast, Image } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { useDisclosure } from "@chakra-ui/hooks";
-import { ArrowBackIcon, InfoOutlineIcon, PhoneIcon } from "@chakra-ui/icons";
+import { Box,  } from "@chakra-ui/layout";
 import ScrollableFriend from "./ScrollableFriend";
 // import callwindow from "./Call/callwindow";
 

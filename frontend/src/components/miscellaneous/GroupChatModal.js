@@ -43,6 +43,7 @@ const GroupChatModal = ({ children }) => {
     }
 
     setSelectedUsers([...selectedUsers, userToAdd]);
+
   };
 
   const handleSearch = async (query) => {
@@ -58,9 +59,11 @@ const GroupChatModal = ({ children }) => {
         },
       };
       const { data } = await axios.get(`/api/user?search=${query}`, config);
-      console.log(data);
+      
       setLoading(false);
+      
       setSearchResult(data);
+
     } catch (error) {
       toast({
         title: "Error Occured!",
@@ -122,6 +125,8 @@ const GroupChatModal = ({ children }) => {
         position: "bottom",
       });
     }
+    setSelectedUsers([]);
+    setSearchResult([]);
   };
 
   return (

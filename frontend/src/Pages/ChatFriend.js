@@ -1,9 +1,6 @@
 import { Box } from "@chakra-ui/layout";
-import { useEffect, useState, useContext } from "react";
-import Chatbox from "../components/Chatbox";
-import MyChats from "../components/MyChats";
+import { useEffect, useState,  } from "react";
 import SideDrawer from "../components/miscellaneous/SideDrawer";
-import { ChatState, ChatContext } from "../Context/ChatProvider";
 import { useHistory } from "react-router-dom";
 import MyFriends from "../components/FriendComponent/MyFriend";
 import FriendTable from "../components/FriendComponent/FriendTable";

@@ -94,9 +94,7 @@ const sendFileMessage = asyncHandler(async (req, res, next) => {
       chat: chatId,
       file: fileURL,
     };
-
     console.log("file: ", newMessage);
-
     var message = await Message.create(newMessage);
     message = await message.populate("sender", "name pic");
     message = await message.populate("chat");
@@ -113,7 +111,7 @@ const sendFileMessage = asyncHandler(async (req, res, next) => {
 });
 const getFileMessageAWS = asyncHandler(async (req, res, next) => {
   const imageUrl = req.params.imageUrl;
-  console.log("Image Url:", imageUrl);
+  // console.log("Image Url:", imageUrl);
   const params = {
     TableName: tableName,
     Key: {
@@ -150,7 +148,7 @@ const recallMessage = asyncHandler(async (req, res, next) => {
       path: "chat.users",
       select: "name pic email",
     });
-    console.log("CONTROLLER: ", messRecall);
+    // console.log("CONTROLLER: ", messRecall);
     res.json(messRecall);
   } catch (error) {
     res.status(400);
@@ -161,6 +159,7 @@ const getAllImageMessages = asyncHandler(async (req, res, next) => {
   try {
     const messages = await Message.find({ chat: req.params.chatId })
       .find({ content: "image" })
+      .find({recallMessage: {$ne:1}})
       .populate("sender", "name pic email")
       .populate("chat");
     res.json(messages);

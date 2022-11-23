@@ -26,9 +26,7 @@ const MyFriends = () => {
 
   const toast = useToast();
   const [friends, setFriens] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const history = useHistory();
 

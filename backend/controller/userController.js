@@ -6,13 +6,20 @@ const bcryptjs = require("bcryptjs");
 var ip = require("ip");
 // console.dir(ip.address());
 const register = asyncHandler(async (req, res) => {
-  const { name, email, password, pic } = req.body;
-  if (!name || !email || !password) {
+  const { name, email, password, pic, sex, phone, birth } = req.body;
+  // console.log(req.body);
+  if (!name || !email || !password || !sex || !phone || !birth) {
     res.status(400);
     throw new Error("Pls enter all Fields");
   }
+  // console.log("xxxxx");
   const userExists = await User.findOne({ email });
   if (userExists) {
+    res.status(400);
+    throw new Error("User already exists");
+  }
+  const phoneExits = await User.findOne({ phone });
+  if (phoneExits) {
     res.status(400);
     throw new Error("User already exists");
   }
@@ -21,6 +28,9 @@ const register = asyncHandler(async (req, res) => {
     email,
     password,
     pic,
+    sex,
+    phone,
+    birth,
   });
   if (user) {
     bcryptjs.hash(user.email, 10).then((hashMail) => {
@@ -41,6 +51,9 @@ const register = asyncHandler(async (req, res) => {
       email: user.email,
       pic: user.pic,
       token: generateToken(user._id),
+      phone: user.phone,
+      birth: user.birth,
+      sex: user.sex,
     });
   } else {
     res.status(400);
@@ -61,6 +74,9 @@ const authUser = asyncHandler(async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        sex: user.sex,
+        phone: user.phone,
+        birth: user.birth,
         pic: user.pic,
         token: generateToken(user._id),
       });
@@ -77,8 +93,8 @@ const allUsers = asyncHandler(async (req, res) => {
   const keyword = req.query.search
     ? {
         $or: [
-          { name: { $regex: req.query.search, $options: "i" } },
-          { email: { $regex: req.query.search, $options: "i" } },
+          { phone: req.query.search },
+          { email: req.query.search },
         ],
       }
     : {};
@@ -108,4 +124,48 @@ const verify = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { register, authUser, allUsers, verify };
+const updateProfile = asyncHandler(async (req, res) => {
+  const { userId, name, pic, sex, birth } = req.body;
+  // const userExists = await User.findOne({ _id: userId });
+  // if(!userExists ){
+  //   res.status(400);
+  //   throw new Error("User is not exists");
+  // }
+  // console.log(userId);
+  if (!name ||  !sex || !birth) {
+    res.status(400);
+    throw new Error("Pls enter all Fields");
+  }
+  // if (userExists) {
+  //   res.status(400);
+  //   throw new Error("User already exists");
+  // }
+  // const { userId } = req.body;
+  const userNew = await User.findByIdAndUpdate(
+    {
+      _id: userId
+    },
+    {
+      name,
+      pic,
+      sex,
+      birth,
+    }
+  );
+  if (userNew) {
+    res.status(200).json({
+      _id: userNew._id,
+      name: userNew.name,
+      email: userNew.email,
+      pic: userNew.pic,
+      phone: userNew.phone,
+      birth: userNew.birth,
+      sex: userNew.sex,
+    });
+  } else {
+    res.status(400);
+    throw new Error("Cant update User ");
+  }
+});
+
+module.exports = { register, authUser, allUsers, verify, updateProfile  };

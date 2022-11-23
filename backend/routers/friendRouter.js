@@ -6,7 +6,8 @@ const {
   makeFriend,
   getListFriend,
   checkTonTai,
-  getStatusFriend
+  getStatusFriend,
+  getFriendByName
 } = require("../controller/friendController");
 
 const router = express.Router();
@@ -16,5 +17,6 @@ router.route("/unfriend").post(project, unfriend);
 router.route("/checkFriend").post(project, checkTonTai);
 router.route("/getListFriend").post(project, getListFriend);
 router.route("/getStatusFriend").post(project, getStatusFriend)
+router.route("/findUserFriend").get(project, getFriendByName)
 
 module.exports = router;

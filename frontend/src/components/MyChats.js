@@ -34,7 +34,6 @@ const MyChats = ({ fetchAgain, socket }) => {
       minute: "2-digit",
     });
   };
- 
 
   useEffect(() => {
     setuser(loggedUser);
@@ -54,8 +53,8 @@ const MyChats = ({ fetchAgain, socket }) => {
       const { data } = await axios.get("/api/chat", config);
       // console.log("XXX", user.token);
       setChats(data);
-      console.log("MYCHAT data:", data);
     } catch (error) {
+      console.log(error);
       toast({
         title: "Error Occured!",
         description: "Failed to Load the chats (MY CHAT)",
@@ -68,28 +67,25 @@ const MyChats = ({ fetchAgain, socket }) => {
   };
 
   const xuLyChats = (chatsX, newMessageRecieved) => {
-    console.log("TRUNG NE XXXXX ");
     chatsX.forEach((chat) => {
       if (chat._id == newMessageRecieved.chat._id) {
-        console.log("TRUNG NE");
         // chat.users.forEach((user1) => {
-          // if (user1._id == newMessageRecieved.sender._id) {
-            chat.latestMessage = newMessageRecieved;
-            setchat1(newMessageRecieved);
-          // }
+        // if (user1._id == newMessageRecieved.sender._id) {
+        chat.latestMessage = newMessageRecieved;
+        setchat1(newMessageRecieved);
+        // }
         // });
       }
     });
-    
   };
   useEffect(() => {
     if (socket) {
       socket.on("message recieved", (newMessageRecieved) => {
-        console.log("on: ", socket);
+        // console.log("on: ", socket);
         xuLyChats(chats, newMessageRecieved);
-        setChats(prevState => prevState = chats);
-    
-    console.log("ham: ", chats);
+        setChats((prevState) => (prevState = chats));
+
+        console.log("ham: ", chats);
       });
     } else {
       setSelectedChat(chats[chats.length - 1]);

@@ -149,11 +149,65 @@ const getListFriend = asyncHandler(async (req, res) => {
     }
   }
 });
+const getFriendByName = asyncHandler(async (req, res) => {
+  console.log("toi chua 3");
+  var userId = req.query.userId;
+  if (!userId) {
+    console.log("Chua co User");
+    return res.sendStatus(400);
+  } else {
+    try {
+      var listFriend = [];
+      const getListFriend = await Friend.find({
+        $or: [
+          {
+            user: userId,
+          },
+          { friend: userId },
+        ],
+      })
+        .find({ status: 2 })
+        .select("user friend -_id");
+      getListFriend.forEach((friend) => {
+        if (!friend.user._id.toString().includes(userId))
+          listFriend.push(friend.user._id.toString());
+        if (!friend.friend._id.toString().includes(userId))
+          listFriend.push(friend.friend._id.toString());
+      });
+      var kq = [];
+      listFriend.forEach(async (user) => {
+        var temp = await User.findOne({ _id: user })
+          .findOne({ name: { $regex: req.query.search, $options: "i" }});
+        if(temp){
+          kq.push(temp);
+        }
+      });
+      setTimeout(() => {
+        res.json(kq);
+        console.log("KQ:", kq);
+      }, 1000);
+      // const keyword = req.query.search
+      //   ? {
+      //       name: { $regex: req.query.search, $options: "i" },
+      //     }
+      //   : {};
+      // const users = await kq.find(keyword).find({
+      //   _id: { $ne: req.query.userId },
+      // });
+      // console.log(users);
+      // res.json(users);
+    } catch (error) {
+      res.status(400);
+      throw new Error(error.message);
+    }
+  }
+});
 module.exports = {
   sendRequest,
   unfriend,
   makeFriend,
   getListFriend,
   checkTonTai,
-  getStatusFriend
+  getStatusFriend,
+  getFriendByName
 };
