@@ -58,7 +58,7 @@ const Signup = () => {
 
     if (!regexName.test(email)) {
       toast({
-        title: "Wrong syntax",
+        title: "Please enter a valid email address",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -215,20 +215,20 @@ const Signup = () => {
           <Stack direction="row">
             <Radio
               colorScheme="green"
-              value={1}
+              value='1'
             >
               Male
             </Radio>
             <Radio
               colorScheme="green"
-              value={2}
+              value='2'
              
             >
               Female
             </Radio>
             <Radio
               colorScheme="green"
-              value={3}
+              value='3'
               
             >
               Other

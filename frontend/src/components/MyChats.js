@@ -12,12 +12,9 @@ import { useHistory } from "react-router-dom";
 import { Avatar } from "@chakra-ui/avatar";
 
 const MyChats = ({ fetchAgain, socket }) => {
-  const [loggedUser, setLoggedUser] = useState(
-    JSON.parse(localStorage.getItem("userInfo"))
-  );
-
   const { user, setuser, selectedChat, setSelectedChat, chats, setChats } =
     ChatState();
+  const loggedUser = JSON.parse(localStorage.getItem("userInfo"));
 
   const [chat1, setchat1] = useState([]);
 
@@ -34,7 +31,8 @@ const MyChats = ({ fetchAgain, socket }) => {
       minute: "2-digit",
     });
   };
-
+  
+  console.log("log",loggedUser);
   useEffect(() => {
     setuser(loggedUser);
     if (loggedUser == null) {

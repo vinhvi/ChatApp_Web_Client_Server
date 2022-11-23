@@ -98,8 +98,6 @@ function SideDrawer() {
       return;
     }
 
-
-    
     try {
       setLoading(true);
 
@@ -114,12 +112,11 @@ function SideDrawer() {
         `/api/friend/findUserFriend?search=${search}&userId=${user._id}`,
         config
       );
-      if(data.length > 0){
-        console.log("BAN",data);
+      if (data.length > 0) {
+        console.log("BAN", data);
         setSearchResult(data);
         setLoading(false);
       }
-     
     } catch (error) {
       toast({
         title: "Error Occured!",
@@ -140,7 +137,7 @@ function SideDrawer() {
       };
 
       const { data } = await axios.get(`/api/user?search=${search}`, config);
-      if(data.length > 0){
+      if (data.length > 0) {
         setSearchResult(data);
         console.log("in ra ne");
       }
@@ -155,7 +152,6 @@ function SideDrawer() {
       });
     }
 
-    
     try {
       setLoading(true);
 
@@ -239,13 +235,13 @@ function SideDrawer() {
             variant="ghost"
             fontSize="35px"
             size="lg"
-            _hover={{ background: "gray.400" }}
+            _hover={{ background: "#16A085" }}
             onClick={() => {
               history.push("/chats");
               setselectedFriend(false);
             }}
             style={{
-              background: `${selectedFriend === false ? "gray" : "117A65"}`,
+              background: `${selectedFriend === false ? "#16A085" : "117A65"}`,
             }}
             icon={<IoHome color="white" />}
           />
@@ -253,14 +249,14 @@ function SideDrawer() {
             variant="ghost"
             fontSize="35px"
             size="lg"
-            _hover={{ background: "gray.400" }}
+            _hover={{ background: "#16A085" }}
             onClick={() => {
               history.push("/friend");
               setselectedFriend(true);
-              console.log(selectedFriend);
+              // console.log(selectedFriend);
             }}
             style={{
-              background: `${selectedFriend === true ? "gray" : "117A65"}`,
+              background: `${selectedFriend === true ? "#16A085" : "117A65"}`,
             }}
             icon={<FaUserFriends color="white" />}
           />

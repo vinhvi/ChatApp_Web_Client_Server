@@ -1,4 +1,4 @@
-import { ViewIcon, InfoOutlineIcon } from "@chakra-ui/icons";
+import { InfoOutlineIcon } from "@chakra-ui/icons";
 import {
   Modal,
   ModalOverlay,
@@ -10,37 +10,102 @@ import {
   Button,
   useDisclosure,
   IconButton,
-  Image,
+  Avatar,
 } from "@chakra-ui/react";
 import { Stack } from "@chakra-ui/layout";
-import { Divider } from "@chakra-ui/react";
-import { Input, InputLeftElement, InputGroup } from "@chakra-ui/input";
-import { PhoneIcon } from "@chakra-ui/icons";
+import { Input } from "@chakra-ui/input";
 import { useState } from "react";
 import { useToast } from "@chakra-ui/toast";
 import axios from "axios";
 import { FormControl, FormLabel } from "@chakra-ui/form-control";
 import { Radio, RadioGroup } from "@chakra-ui/react";
+// import ChatLoading from "../ChatLoading";
 
 const UpdateProfileModal = ({ user, children }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [userId, setUserId] = useState(user._id);
   const [name, setName] = useState(user.name);
-  const [pic, setPic] = useState();
+  const [pic, setPic] = useState(user.pic);
   const [birth, setBirth] = useState(user.birth);
   const [sex, setsex] = useState(user.sex.toString());
   const toast = useToast();
   const [loading, setLoading] = useState(false);
+  const [token, settoken] = useState(user.token);
 
   const handleTimeSend = () => {
     const x = new Date(birth);
-    // console.log(birth);
     const month =
       x.getMonth() + 1 < 10 ? "0" + (x.getMonth() + 1) : x.getMonth() + 1;
-    const date =x.getDate() < 10 ? "0" + (x.getDate()) : x.getDate() ;
-    const a = x.getFullYear() + "-" + month+"-" + date;
-    // console.log(a);
+    const date = x.getDate() < 10 ? "0" + x.getDate() : x.getDate();
+    const a = x.getFullYear() + "-" + month + "-" + date;
     return a;
+  };
+
+  const deleteImageInInput = () => {
+    const e3 = document.getElementById("imagine");
+
+    e3.value = "";
+  };
+
+  const postDetails = (pics) => {
+    console.log("tam hinh", pics);
+    setLoading(true);
+    if (pics === undefined) {
+      toast({
+        title: "Please Select an Image!",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+
+      setLoading(false);
+      return;
+    }
+    if (pics.type === "image/jpeg" || pics.type === "image/png") {
+      // setTimeout(() => {
+      const data = new FormData();
+      data.append("file", pics);
+      data.append("upload_preset", "MongoChat04");
+      data.append("cloud_name", "dfgkg5eej");
+      fetch("https://api.cloudinary.com/v1_1/dfgkg5eej/image/upload", {
+        method: "post",
+        body: data,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          // setPic(data.url.toString());
+          // console.log(data.url.toString());
+          setPic(data.url.toString());
+
+          setLoading(false);
+          deleteImageInInput();
+        })
+        .catch((err) => {
+          console.log(err);
+          setLoading(false);
+        });
+      // }, 4000);
+      console.log("CHAY CHAY NHE!!!");
+      // submitHandler();
+    } else {
+      toast({
+        title: "Please Select an Image!",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+      deleteImageInInput();
+      setLoading(false);
+      return;
+    }
+  };
+
+  const uploadImagine = () => {
+    const e3 = document.getElementById("imagine");
+    // const e4 = refImage.current;
+    e3.click();
   };
 
   const updateProfile = async () => {
@@ -91,7 +156,12 @@ const UpdateProfileModal = ({ user, children }) => {
         config
       );
       localStorage.removeItem("userInfo");
+      data.token = token;
       localStorage.setItem("userInfo", JSON.stringify(data));
+      // setTimeout(() => {
+
+      //   history.go(0);
+      // }, 1000);
       toast({
         title: "Update Success",
         status: "success",
@@ -128,7 +198,13 @@ const UpdateProfileModal = ({ user, children }) => {
       <Modal
         // scrollBehavior={scrollBehavior}
         size="lg"
-        onClose={onClose}
+        onClose={() => {
+          onClose();
+          setPic(user.pic);
+          setName(user.name);
+          setBirth(user.birth);
+          deleteImageInInput();
+        }}
         isOpen={isOpen}
         // isCentered
         // height="1300px"
@@ -149,14 +225,22 @@ const UpdateProfileModal = ({ user, children }) => {
             alignItems="center"
             justifyContent="space-between"
           >
-            <Button>
-              <Image
-                borderRadius="full"
-                boxSize="100px"
-                src={user.pic}
-                alt={user.name}
-              />
-            </Button>
+            <Avatar
+              borderRadius="full"
+              boxSize="100px"
+              src={pic}
+              // alt={user.name}
+              id="avartar"
+              onClick={uploadImagine}
+            />
+            <input
+              type="file"
+              style={{ display: "none" }}
+              id="imagine"
+              accept="image/*"
+              onChange={(e) => postDetails(e.target.files[0])}
+            />
+
             <FormControl id="first-name" isRequired>
               <FormLabel>Name</FormLabel>
               <Input
@@ -196,10 +280,24 @@ const UpdateProfileModal = ({ user, children }) => {
             </FormControl>
           </ModalBody>
           <ModalFooter>
-            <Button onClick={onClose} mr={3}>
+            <Button
+              isLoading={loading}
+              onClick={() => {
+                onClose();
+                setPic(user.pic);
+                setName(user.name);
+                setBirth(user.birth);
+                deleteImageInInput();
+              }}
+              mr={3}
+            >
               Close
             </Button>
-            <Button onClick={updateProfile} colorScheme="green">
+            <Button
+              isLoading={loading}
+              onClick={updateProfile}
+              colorScheme="green"
+            >
               Update
             </Button>
           </ModalFooter>
